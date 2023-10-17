@@ -410,6 +410,37 @@ func (c *Client) Start() (err error) {
 	}
 
 	var dialer dialer
+	if len(c.Config().MultipleRemote) > 0 && len(c.Config().Remote) == 0 {
+		var hasQuic bool
+		if len(c.Config().MultipleRemote) == 2 {
+			for index, remote := range c.Config().MultipleRemote {
+				var u *url.URL
+				u, err = url.Parse(remote)
+				if u.Scheme == "quic" {
+					hasQuic = true
+					if len(u.Port()) < 1 {
+						u.Host = net.JoinHostPort(u.Host, "443")
+					}
+					avgRtt, pktLoss := connection.GetAutoProbesResults(u.Host)
+
+					var networkCondition = []float64{0, 0, 0, 0, avgRtt, pktLoss, 0, 0, 0, 0}
+					result := connection.PredictWithRttAndLoss(networkCondition)
+
+					if result[1] > result[0] {
+						c.Config().Remote = c.Config().MultipleRemote[index]
+					} else {
+						c.Config().Remote = c.Config().MultipleRemote[len(c.Config().MultipleRemote)-index-1]
+					}
+				}
+			}
+			if !hasQuic {
+				c.Config().Remote = c.Config().MultipleRemote[0]
+			}
+		} else {
+			c.Config().Remote = c.Config().MultipleRemote[0]
+		}
+		c.Logger.Info().Str("remote", c.Config().Remote).Msg("intelligent switch strategy finally choose to establish with")
+	}
 	if len(c.Config().Remote) > 0 {
 		if !strings.Contains(c.Config().Remote, "://") {
 			c.Config().Remote = "tcp://" + c.Config().Remote
