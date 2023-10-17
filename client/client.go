@@ -414,6 +414,7 @@ func (c *Client) Start() (err error) {
 		var hasQuic bool
 		if len(c.Config().MultipleRemote) == 2 {
 			for index, remote := range c.Config().MultipleRemote {
+				fmt.Println(remote)
 				var u *url.URL
 				u, err = url.Parse(remote)
 				if u.Scheme == "quic" {
