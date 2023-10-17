@@ -412,6 +412,10 @@ func (c *Client) Start() (err error) {
 	var dialer dialer
 	if len(c.Config().MultipleRemote) > 0 && len(c.Config().Remote) == 0 {
 		var hasQuic bool
+		fmt.Println(len(c.Config().MultipleRemote))
+		for index, remote := range c.Config().MultipleRemote {
+			fmt.Println(index, remote)
+		}
 		if len(c.Config().MultipleRemote) == 2 {
 			for index, remote := range c.Config().MultipleRemote {
 				fmt.Println(remote)
