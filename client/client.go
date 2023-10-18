@@ -305,7 +305,7 @@ func (d *dialer) init(c *Client, remote string, stun string) (err error) {
 }
 
 func (d *dialer) initWithRemote(c *Client) (err error) {
-	return d.init(c, c.Config().Remote, c.Config().RemoteSTUN)
+	return d.init(c, c.Config().Remote[c.chosenRemoteLabel], c.Config().RemoteSTUN)
 }
 
 func (d *dialer) initWithRemoteAPI(c *Client) (err error) {
@@ -410,15 +410,15 @@ func (c *Client) Start() (err error) {
 	}
 
 	var dialer dialer
-	if len(c.Config().MultipleRemote) > 0 && len(c.Config().Remote) == 0 {
+	if len(c.Config().Remote) > 0 {
 		var hasQuic bool
-		fmt.Println(len(c.Config().MultipleRemote))
-		for index, remote := range c.Config().MultipleRemote {
-			fmt.Println(index, remote)
+		for index, _ := range c.Config().Remote {
+			if !strings.Contains(c.Config().Remote[index], "://") {
+				c.Config().Remote[index] = "tcp://" + c.Config().Remote[index]
+			}
 		}
-		if len(c.Config().MultipleRemote) == 2 {
-			for index, remote := range c.Config().MultipleRemote {
-				fmt.Println(remote)
+		if len(c.Config().Remote) >= 2 {
+			for index, remote := range c.Config().Remote {
 				var u *url.URL
 				u, err = url.Parse(remote)
 				if u.Scheme == "quic" {
@@ -432,24 +432,23 @@ func (c *Client) Start() (err error) {
 					result := connection.PredictWithRttAndLoss(networkCondition)
 
 					if result[1] > result[0] {
-						c.Config().Remote = c.Config().MultipleRemote[index]
+						c.chosenRemoteLabel = index
 					} else {
-						c.Config().Remote = c.Config().MultipleRemote[len(c.Config().MultipleRemote)-index-1]
+						if index == 0 {
+							c.chosenRemoteLabel = 1
+						} else {
+							c.chosenRemoteLabel = 0
+						}
 					}
 				}
 			}
 			if !hasQuic {
-				c.Config().Remote = c.Config().MultipleRemote[0]
+				c.chosenRemoteLabel = 0
 			}
 		} else {
-			c.Config().Remote = c.Config().MultipleRemote[0]
+			c.chosenRemoteLabel = 0
 		}
-		c.Logger.Info().Str("remote", c.Config().Remote).Msg("intelligent switch strategy finally choose to establish with")
-	}
-	if len(c.Config().Remote) > 0 {
-		if !strings.Contains(c.Config().Remote, "://") {
-			c.Config().Remote = "tcp://" + c.Config().Remote
-		}
+		c.Logger.Info().Str("remote", c.Config().Remote[c.chosenRemoteLabel]).Msg("intelligent switch strategy finally choose to establish with")
 		err = dialer.initWithRemote(c)
 		if err != nil {
 			return
