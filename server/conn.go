@@ -172,7 +172,7 @@ func (c *conn) handle(handleFunc func() bool) {
 			}()
 			for {
 				buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
-				//fmt.Println(buf)
+				fmt.Println(buf)
 				if err != nil {
 					c.Logger.Error().Err(err).Msg("can not use QUIC datagram for network probes")
 					return
