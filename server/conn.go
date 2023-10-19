@@ -166,7 +166,7 @@ func (c *conn) handle(handleFunc func() bool) {
 		case 0x02:
 			var buf []byte
 			for {
-				timer := time.AfterFunc(connection.ScaleDuration(3*time.Second), func() {
+				timer := time.AfterFunc(3*time.Second, func() {
 					fmt.Println("closing conn")
 					c.Close()
 				})
