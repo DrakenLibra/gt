@@ -200,31 +200,34 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 	}
 	fmt.Println(addr)
 
-	buf := []byte{predef.MagicNumber, 0x02}
-	_, err = conn.Write(buf)
+	sendBuffer := []byte{predef.MagicNumber, 0x02}
+	_, err = conn.Write(sendBuffer)
 	if err != nil {
 		return
 	}
 
 	totalNum := 100
 
-	var wg sync.WaitGroup
-	wg.Add(totalNum)
+	var readBuffer []byte
+
+	//var wg sync.WaitGroup
+	//wg.Add(totalNum)
 
 	for i := 0; i < totalNum; i++ {
 		go func() {
-			timeStr := time.Now().Format("2006-01-02 15:04:05")
-			//fmt.Println(timeStr)
-			timeBuffer := []byte(timeStr)
-			fmt.Println(timeBuffer)
-			err = conn.(*QuicConnection).SendMessage(timeBuffer)
+			err = conn.(*QuicConnection).SendMessage([]byte(time.Now().Format("2006-01-02 15:04:05")))
 			if err != nil {
 				return
 			}
-			wg.Done()
+			//wg.Done()
 		}()
 	}
-	wg.Wait()
+	//wg.Wait()
+
+	for {
+		readBuffer, err = conn.(*QuicConnection).ReceiveMessage()
+		fmt.Println(string(readBuffer))
+	}
 
 	avgRtt = 0
 	pktLoss = 0

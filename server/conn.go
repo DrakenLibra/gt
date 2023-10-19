@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"runtime/debug"
@@ -164,14 +163,20 @@ func (c *conn) handle(handleFunc func() bool) {
 			handled = c.handleTunnelLoop(remoteIP)
 			return
 		case 0x02:
+			var buf []byte
 			for {
-				buf, err := c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
+				buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
 				//fmt.Println(buf)
 				if err != nil {
-					fmt.Println(err)
+					c.Logger.Error().Err(err).Msg("can not use QUIC datagram for network probes")
+					return
 				}
 				if buf != nil {
-					fmt.Println(buf)
+					err = c.Connection.Conn.(*connection.QuicConnection).SendMessage(buf)
+					if err != nil {
+						c.Logger.Error().Err(err).Msg("can not use QUIC datagram for network probes")
+						return
+					}
 				}
 			}
 			handled = true
