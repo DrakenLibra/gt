@@ -227,6 +227,10 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 	for {
 		readBuffer, err = conn.(*QuicConnection).ReceiveMessage()
 		fmt.Println(string(readBuffer))
+		if conn == nil {
+			fmt.Println("connection has closed")
+			break
+		}
 	}
 
 	avgRtt = 0

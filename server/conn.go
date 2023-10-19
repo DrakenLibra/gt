@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"runtime/debug"
@@ -164,6 +165,10 @@ func (c *conn) handle(handleFunc func() bool) {
 			return
 		case 0x02:
 			var buf []byte
+			go func() {
+				time.Sleep(3 * time.Second)
+				c.Close()
+			}()
 			for {
 				buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
 				//fmt.Println(buf)
@@ -177,6 +182,10 @@ func (c *conn) handle(handleFunc func() bool) {
 						c.Logger.Error().Err(err).Msg("can not use QUIC datagram for network probes")
 						return
 					}
+				}
+				if c == nil {
+					fmt.Println("connection has closed")
+					break
 				}
 			}
 			handled = true
