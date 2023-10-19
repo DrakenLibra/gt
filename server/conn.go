@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"runtime/debug"
@@ -162,6 +163,12 @@ func (c *conn) handle(handleFunc func() bool) {
 			// 不能将 reconnectTimes 传参，多线程环境下这个值应该实时获取
 			handled = c.handleTunnelLoop(remoteIP)
 			return
+		case 0x02:
+			for i := 0; i < 100; i++ {
+				buf, _ := c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
+				fmt.Println("index: ", i, buf)
+			}
+			handled = true
 		}
 	}
 	handled = handleFunc()

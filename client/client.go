@@ -421,13 +421,22 @@ func (c *Client) Start() (err error) {
 			for index, remote := range c.Config().Remote {
 				var u *url.URL
 				u, err = url.Parse(remote)
+				if err != nil {
+					err = fmt.Errorf("remote url (-remote option) '%s' is invalid, cause %s", remote, err.Error())
+					return
+				}
 				if u.Scheme == "quic" {
 					c.Logger.Info().Msg("waiting...intelligent switch are sending probes to get network conditions...")
 					hasQuic = true
 					if len(u.Port()) < 1 {
 						u.Host = net.JoinHostPort(u.Host, "443")
 					}
-					avgRtt, pktLoss := connection.GetQuicProbesResults(u.Host)
+					var avgRtt, pktLoss float64
+					avgRtt, pktLoss, err = connection.GetQuicProbesResults(u.Host)
+					if err != nil {
+						c.Logger.Error().Err(err).Msg("can not use QUIC connection to detect network conditions")
+						return err
+					}
 
 					var networkCondition = []float64{0, 0, 0, 0, avgRtt, pktLoss, 0, 0, 0, 0}
 					result := connection.PredictWithRttAndLoss(networkCondition)

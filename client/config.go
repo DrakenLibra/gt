@@ -82,8 +82,6 @@ type Options struct {
 	Signal string `arg:"s" yaml:"-" usage:"Send signal to client processes. Supports values: reload, restart, stop, kill"`
 
 	OpenBBR bool `yaml:"bbr" usage:"Use bbr as congestion control algorithm when GT use QUIC connection. Default algorithm is Cubic."`
-
-	//MultipleRemote config.Slice[string] `yaml:"multiRemote" usage:"The remote server url. Supports tcp:// tls:// quic://, default tcp://"`
 }
 
 func defaultConfig() Config {

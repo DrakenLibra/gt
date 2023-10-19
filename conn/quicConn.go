@@ -9,12 +9,14 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	quicbbr "github.com/DrakenLibra/gt-bbr"
+	"github.com/isrc-cas/gt/predef"
 	probing "github.com/prometheus-community/pro-bing"
 	"github.com/quic-go/quic-go"
 	"math/big"
 	"net"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 type QuicConnection struct {
@@ -187,38 +189,38 @@ func GetAutoProbesResults(addr string) (avgRtt, pktLoss float64) {
 	return
 }
 
-func GetQuicProbesResults(addr string) (avgRtt, pktLoss float64) {
-	pureAddr, _, _ := net.SplitHostPort(addr)
+func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err error) {
+	tlsConfig := &tls.Config{}
+	tlsConfig.InsecureSkipVerify = true
+
+	conn, err := QuicDial(addr, tlsConfig)
+	if err != nil {
+		return
+	}
+
+	buf := []byte{predef.MagicNumber, 0x02}
+	_, err = conn.Write(buf)
+	if err != nil {
+		return
+	}
+
 	totalNum := 100
 
 	var wg sync.WaitGroup
 	wg.Add(totalNum)
 
-	var totalLossRate int64 = 0
-	var totalDelay int64 = 0
 	for i := 0; i < totalNum; i++ {
 		go func() {
-			pinger, err := probing.NewPinger(pureAddr)
+			err = conn.(*QuicConnection).SendMessage([]byte(time.Now().Format("2006-01-02 15:04:05")))
 			if err != nil {
-				panic(err)
+				return
 			}
-			pinger.Count = 3
-			err = pinger.Run()
-			if err != nil {
-				panic(err)
-			}
-			stats := pinger.Statistics()
-			avgRtt := stats.AvgRtt.Microseconds()
-			pktLoss := int64(stats.PacketLoss * 100)
-			atomic.AddInt64(&totalLossRate, pktLoss)
-			atomic.AddInt64(&totalDelay, avgRtt)
 			wg.Done()
 		}()
 	}
 	wg.Wait()
 
-	avgRtt = float64(atomic.LoadInt64(&totalDelay)) / (float64(1000 * totalNum))
-	pktLoss = float64(atomic.LoadInt64(&totalLossRate)) / float64(totalNum*100)
-
+	avgRtt = 0
+	pktLoss = 0
 	return
 }
