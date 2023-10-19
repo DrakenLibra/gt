@@ -165,8 +165,11 @@ func (c *conn) handle(handleFunc func() bool) {
 			return
 		case 0x02:
 			for {
-				buf, _ := c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
-				fmt.Println(buf)
+				buf, err := c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
+				//fmt.Println(buf)
+				if err != nil {
+					fmt.Println(err)
+				}
 				if buf != nil {
 					fmt.Println(buf)
 				}
