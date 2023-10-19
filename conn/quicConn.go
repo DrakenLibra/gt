@@ -11,7 +11,7 @@ import (
 	"fmt"
 	quicbbr "github.com/DrakenLibra/gt-bbr"
 	"github.com/isrc-cas/gt/predef"
-	. "github.com/onsi/gomega"
+	gomega "github.com/onsi/gomega"
 	probing "github.com/prometheus-community/pro-bing"
 	"github.com/quic-go/quic-go"
 	"math/big"
@@ -246,6 +246,6 @@ func ScaleDuration(d time.Duration) time.Duration {
 	if f, err := strconv.Atoi(os.Getenv("TIMESCALE_FACTOR")); err == nil { // parsing "" errors, so this works fine if the env is not set
 		scaleFactor = f
 	}
-	Expect(scaleFactor).ToNot(BeZero())
+	gomega.Expect(scaleFactor).ToNot(gomega.BeZero())
 	return time.Duration(scaleFactor) * d
 }
