@@ -179,6 +179,9 @@ func (c *conn) handle(handleFunc func() bool) {
 					buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
 					fmt.Println(buf)
 					if err != nil {
+						if err.Error() == "timeout: no recent network activity" {
+							break
+						}
 						c.Logger.Error().Err(err).Msg("can not use QUIC datagram for network probes")
 						return
 					}
@@ -200,6 +203,7 @@ func (c *conn) handle(handleFunc func() bool) {
 			}
 		Label:
 			handled = true
+			return
 		}
 	}
 	handled = handleFunc()
