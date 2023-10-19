@@ -51,7 +51,7 @@ func (c *QuicBbrConnection) Close() error {
 
 func QuicDial(addr string, config *tls.Config) (net.Conn, error) {
 	config.NextProtos = []string{"gt-quic"}
-	conn, err := quic.DialAddr(context.Background(), addr, config, &quic.Config{})
+	conn, err := quic.DialAddr(context.Background(), addr, config, &quic.Config{EnableDatagrams: true})
 	if err != nil {
 		panic(err)
 	}
@@ -85,7 +85,7 @@ func QuicBbrDial(addr string, config *tls.Config) (net.Conn, error) {
 
 func QuicListen(addr string, config *tls.Config) (net.Listener, error) {
 	config.NextProtos = []string{"gt-quic"}
-	listener, err := quic.ListenAddr(addr, config, &quic.Config{})
+	listener, err := quic.ListenAddr(addr, config, &quic.Config{EnableDatagrams: true})
 	if err != nil {
 		panic(err)
 	}
