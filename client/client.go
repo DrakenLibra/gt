@@ -426,7 +426,7 @@ func (c *Client) Start() (err error) {
 					return
 				}
 				if u.Scheme == "quic" {
-					c.Logger.Info().Msg("waiting...intelligent switch are sending probes to get network conditions...")
+					c.Logger.Info().Str("remote", remote).Msg("waiting...intelligent switch are sending probes to get network conditions...")
 					hasQuic = true
 					if len(u.Port()) < 1 {
 						u.Host = net.JoinHostPort(u.Host, "443")
