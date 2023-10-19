@@ -11,10 +11,13 @@ import (
 	"fmt"
 	quicbbr "github.com/DrakenLibra/gt-bbr"
 	"github.com/isrc-cas/gt/predef"
+	. "github.com/onsi/gomega"
 	probing "github.com/prometheus-community/pro-bing"
 	"github.com/quic-go/quic-go"
 	"math/big"
 	"net"
+	"os"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -198,7 +201,7 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 	if err != nil {
 		return
 	}
-	fmt.Println(addr)
+	//fmt.Println(addr)
 
 	sendBuffer := []byte{predef.MagicNumber, 0x02}
 	_, err = conn.Write(sendBuffer)
@@ -236,4 +239,13 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 	avgRtt = 0
 	pktLoss = 0
 	return
+}
+
+func ScaleDuration(d time.Duration) time.Duration {
+	scaleFactor := 1
+	if f, err := strconv.Atoi(os.Getenv("TIMESCALE_FACTOR")); err == nil { // parsing "" errors, so this works fine if the env is not set
+		scaleFactor = f
+	}
+	Expect(scaleFactor).ToNot(BeZero())
+	return time.Duration(scaleFactor) * d
 }

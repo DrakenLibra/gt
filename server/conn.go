@@ -165,45 +165,66 @@ func (c *conn) handle(handleFunc func() bool) {
 			return
 		case 0x02:
 			var buf []byte
-			closeChan := make(chan bool)
-			bufChan := make(chan []byte)
-
-			go func() {
-				time.Sleep(3 * time.Second)
-				c.Close()
-				closeChan <- true
-			}()
-
-			go func() {
-				for {
-					buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
-					fmt.Println(buf)
-					if err != nil {
-						if err.Error() == "timeout: no recent network activity" {
-							break
-						}
-						c.Logger.Error().Err(err).Msg("can not use QUIC datagram for network probes")
-						return
-					}
-					bufChan <- buf
-				}
-			}()
-
 			for {
-				select {
-				case <-closeChan:
-					goto Label
-				case segBuf := <-bufChan:
-					err = c.Connection.Conn.(*connection.QuicConnection).SendMessage(segBuf)
-					if err != nil {
-						c.Logger.Error().Err(err).Msg("can not use QUIC datagram for network probes")
-						return
-					}
+				timer := time.AfterFunc(connection.ScaleDuration(3*time.Second), func() {
+					fmt.Println("closing conn")
+					c.Close()
+				})
+				if buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage(); err != nil {
+					fmt.Println(time.Now())
+					break
 				}
+				err = c.Connection.Conn.(*connection.QuicConnection).SendMessage(buf)
+				if err != nil {
+					return
+				}
+				timer.Stop()
 			}
-		Label:
 			handled = true
 			return
+			/*
+					var buf []byte
+					closeChan := make(chan bool)
+					bufChan := make(chan []byte)
+
+					go func() {
+						time.Sleep(3 * time.Second)
+						c.Close()
+						closeChan <- true
+					}()
+
+					go func() {
+						for {
+							buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
+							fmt.Println(buf)
+							if err != nil {
+								if err.Error() == "timeout: no recent network activity" {
+									break
+								}
+								c.Logger.Error().Err(err).Msg("can not use QUIC datagram for network probes")
+								return
+							}
+							bufChan <- buf
+						}
+					}()
+
+					for {
+						select {
+						case <-closeChan:
+							goto Label
+						case segBuf := <-bufChan:
+							err = c.Connection.Conn.(*connection.QuicConnection).SendMessage(segBuf)
+							if err != nil {
+								c.Logger.Error().Err(err).Msg("can not use QUIC datagram for network probes")
+								return
+							}
+						}
+					}
+				Label:
+					handled = true
+					return
+
+			*/
 		}
 	}
 	handled = handleFunc()
