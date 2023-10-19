@@ -168,6 +168,7 @@ func (c *conn) handle(handleFunc func() bool) {
 			go func() {
 				time.Sleep(3 * time.Second)
 				c.Close()
+				fmt.Println(c.Connection.Conn.(*connection.QuicConnection))
 			}()
 			for {
 				buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
