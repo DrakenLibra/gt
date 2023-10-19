@@ -164,7 +164,7 @@ func (c *conn) handle(handleFunc func() bool) {
 			handled = c.handleTunnelLoop(remoteIP)
 			return
 		case 0x02:
-			for i := 0; i < 100; i++ {
+			for i := 0; i < 1000; i++ {
 				buf, _ := c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
 				fmt.Println("index: ", i, buf)
 			}
