@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	quicbbr "github.com/DrakenLibra/gt-bbr"
 	"github.com/isrc-cas/gt/predef"
 	probing "github.com/prometheus-community/pro-bing"
@@ -211,7 +212,9 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 
 	for i := 0; i < totalNum; i++ {
 		go func() {
-			err = conn.(*QuicConnection).SendMessage([]byte(time.Now().Format("2006-01-02 15:04:05")))
+			timeStr := time.Now().Format("2006-01-02 15:04:05")
+			fmt.Println(timeStr)
+			err = conn.(*QuicConnection).SendMessage([]byte(timeStr))
 			if err != nil {
 				return
 			}
