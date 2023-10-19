@@ -186,3 +186,39 @@ func GetAutoProbesResults(addr string) (avgRtt, pktLoss float64) {
 
 	return
 }
+
+func GetQuicProbesResults(addr string) (avgRtt, pktLoss float64) {
+	pureAddr, _, _ := net.SplitHostPort(addr)
+	totalNum := 100
+
+	var wg sync.WaitGroup
+	wg.Add(totalNum)
+
+	var totalLossRate int64 = 0
+	var totalDelay int64 = 0
+	for i := 0; i < totalNum; i++ {
+		go func() {
+			pinger, err := probing.NewPinger(pureAddr)
+			if err != nil {
+				panic(err)
+			}
+			pinger.Count = 3
+			err = pinger.Run()
+			if err != nil {
+				panic(err)
+			}
+			stats := pinger.Statistics()
+			avgRtt := stats.AvgRtt.Microseconds()
+			pktLoss := int64(stats.PacketLoss * 100)
+			atomic.AddInt64(&totalLossRate, pktLoss)
+			atomic.AddInt64(&totalDelay, avgRtt)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	avgRtt = float64(atomic.LoadInt64(&totalDelay)) / (float64(1000 * totalNum))
+	pktLoss = float64(atomic.LoadInt64(&totalLossRate)) / float64(totalNum*100)
+
+	return
+}

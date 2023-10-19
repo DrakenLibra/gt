@@ -422,11 +422,12 @@ func (c *Client) Start() (err error) {
 				var u *url.URL
 				u, err = url.Parse(remote)
 				if u.Scheme == "quic" {
+					c.Logger.Info().Msg("waiting...intelligent switch are sending probes to get network conditions...")
 					hasQuic = true
 					if len(u.Port()) < 1 {
 						u.Host = net.JoinHostPort(u.Host, "443")
 					}
-					avgRtt, pktLoss := connection.GetAutoProbesResults(u.Host)
+					avgRtt, pktLoss := connection.GetQuicProbesResults(u.Host)
 
 					var networkCondition = []float64{0, 0, 0, 0, avgRtt, pktLoss, 0, 0, 0, 0}
 					result := connection.PredictWithRttAndLoss(networkCondition)
