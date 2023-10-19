@@ -166,6 +166,7 @@ func (c *conn) handle(handleFunc func() bool) {
 		case 0x02:
 			for {
 				buf, _ := c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage()
+				fmt.Println(buf)
 				if buf != nil {
 					fmt.Println(buf)
 				}

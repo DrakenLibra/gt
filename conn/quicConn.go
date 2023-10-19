@@ -216,6 +216,7 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 			timeStr := time.Now().Format("2006-01-02 15:04:05")
 			//fmt.Println(timeStr)
 			timeBuffer := []byte(timeStr)
+			fmt.Println(timeBuffer)
 			err = conn.(*QuicConnection).SendMessage(timeBuffer)
 			if err != nil {
 				return
