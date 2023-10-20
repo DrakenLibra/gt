@@ -438,6 +438,7 @@ func (c *Client) Start() (err error) {
 						return err
 					}
 
+					c.Logger.Info().Float64("averageRTT", avgRtt).Float64("lossRate", pktLoss).Msg("QUIC probes get network conditions with")
 					var networkCondition = []float64{0, 0, 0, 0, avgRtt, pktLoss, 0, 0, 0, 0}
 					result := connection.PredictWithRttAndLoss(networkCondition)
 
