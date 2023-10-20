@@ -171,11 +171,13 @@ func (c *conn) handle(handleFunc func() bool) {
 					c.Close()
 				})
 				if buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage(); err != nil {
+					fmt.Println("1", err)
 					fmt.Println(time.Now())
 					break
 				}
 				err = c.Connection.Conn.(*connection.QuicConnection).SendMessage(buf)
 				if err != nil {
+					fmt.Println("2", err)
 					return
 				}
 				timer.Stop()

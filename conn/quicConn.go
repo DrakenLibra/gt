@@ -11,13 +11,10 @@ import (
 	"fmt"
 	quicbbr "github.com/DrakenLibra/gt-bbr"
 	"github.com/isrc-cas/gt/predef"
-	gomega "github.com/onsi/gomega"
 	probing "github.com/prometheus-community/pro-bing"
 	"github.com/quic-go/quic-go"
 	"math/big"
 	"net"
-	"os"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -211,8 +208,6 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 
 	totalNum := 100
 
-	var readBuffer []byte
-
 	//var wg sync.WaitGroup
 	//wg.Add(totalNum)
 
@@ -227,25 +222,34 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 	}
 	//wg.Wait()
 
+	var buf []byte
 	for {
-		readBuffer, err = conn.(*QuicConnection).ReceiveMessage()
-		fmt.Println(string(readBuffer))
-		if conn == nil {
-			fmt.Println("connection has closed")
+		timer := time.AfterFunc(3*time.Second, func() {
+			fmt.Println("closing conn")
+			err = conn.(*QuicConnection).CloseWithError(0x42, "close QUIC probe connection")
+			if err != nil {
+				return
+			}
+		})
+		buf, err = conn.(*QuicConnection).ReceiveMessage()
+		fmt.Println(buf)
+		if err != nil {
+			fmt.Println(err.Error(), time.Now())
 			break
 		}
+		timer.Stop()
 	}
+
+	//for {
+	//	readBuffer, err = conn.(*QuicConnection).ReceiveMessage()
+	//	fmt.Println(string(readBuffer))
+	//	if conn == nil {
+	//		fmt.Println("connection has closed")
+	//		break
+	//	}
+	//}
 
 	avgRtt = 0
 	pktLoss = 0
 	return
-}
-
-func ScaleDuration(d time.Duration) time.Duration {
-	scaleFactor := 1
-	if f, err := strconv.Atoi(os.Getenv("TIMESCALE_FACTOR")); err == nil { // parsing "" errors, so this works fine if the env is not set
-		scaleFactor = f
-	}
-	gomega.Expect(scaleFactor).ToNot(gomega.BeZero())
-	return time.Duration(scaleFactor) * d
 }
