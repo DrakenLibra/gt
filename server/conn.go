@@ -172,7 +172,7 @@ func (c *conn) handle(handleFunc func() bool) {
 				ErrorCode:    0x42,
 				ErrorMessage: "close QUIC probe connection",
 			}
-			fmt.Println(myError.Error())
+			//fmt.Println(myError.Error())
 
 			for {
 				timer := time.AfterFunc(3*time.Second, func() {
@@ -180,8 +180,8 @@ func (c *conn) handle(handleFunc func() bool) {
 					c.Close()
 				})
 				if buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage(); err != nil {
-					ok := myError.Is(err)
-					if ok {
+					//ok := myError.Is(err)
+					if err.Error() == myError.Error() {
 						fmt.Println("success", err, time.Now())
 						break
 					} else {
