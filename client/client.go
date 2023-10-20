@@ -227,47 +227,6 @@ func (d *dialer) init(c *Client, remote string, stun string) (err error) {
 		}
 		d.host = u.Host
 		d.dialFn = d.dial
-	case "auto":
-		if len(u.Port()) < 1 {
-			u.Host = net.JoinHostPort(u.Host, "443")
-		}
-		tlsConfig := &tls.Config{}
-		if len(c.Config().RemoteCert) > 0 {
-			var cf []byte
-			cf, err = os.ReadFile(c.Config().RemoteCert)
-			if err != nil {
-				err = fmt.Errorf("failed to read remote cert file (-remoteCert option) '%s', cause %s", c.Config().RemoteCert, err.Error())
-				return
-			}
-			roots := x509.NewCertPool()
-			ok := roots.AppendCertsFromPEM(cf)
-			if !ok {
-				err = fmt.Errorf("failed to parse remote cert file (-remoteCert option) '%s'", c.Config().RemoteCert)
-				return
-			}
-			tlsConfig.RootCAs = roots
-		}
-		if c.Config().RemoteCertInsecure {
-			tlsConfig.InsecureSkipVerify = true
-		}
-		d.host = u.Host
-		d.tlsConfig = tlsConfig
-
-		fmt.Println("GT is waiting for probes to get network conditions!")
-
-		avgRtt, pktLoss := connection.GetAutoProbesResults(d.host)
-
-		var networkCondition = []float64{0, 0, 0, 0, avgRtt, pktLoss, 0, 0, 0, 0}
-		result := connection.PredictWithRttAndLoss(networkCondition)
-
-		if result[1] > result[0] {
-			fmt.Println("According to network conditions, GT has chosen to establish QUIC connection for penetration!")
-			d.dialFn = d.quicDial
-		} else {
-			fmt.Println("According to network conditions, GT has chosen to establish TCP+TLS connection for penetration!")
-			d.dialFn = d.tlsDial
-		}
-
 	case "quic":
 		if len(u.Port()) < 1 {
 			u.Host = net.JoinHostPort(u.Host, "443")
@@ -441,7 +400,6 @@ func (c *Client) Start() (err error) {
 					c.Logger.Info().Float64("averageRTT", avgRtt).Float64("lossRate", pktLoss).Msg("QUIC probes get network conditions with")
 					var networkCondition = []float64{0, 0, 0, 0, avgRtt, pktLoss, 0, 0, 0, 0}
 					result := connection.PredictWithRttAndLoss(networkCondition)
-
 					if result[1] > result[0] {
 						c.chosenRemoteLabel = index
 					} else {

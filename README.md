@@ -357,20 +357,21 @@ options:
 
 #### Intelligent Internal Penetration (Adaptive Selection of TCP/QUIC)
 
-- Requirements: There is an intranet server and a public network server, and id1.example.com resolves to the address of the public network server. Hopefully by accessing id1.example.com:8080
-  To access the web page served by port 80 on the intranet server. GT client sends multiple sets of network status detection probes concurrently to obtain the network delay and packet loss rate between the intranet server and the public network server.
-  Input the trained XGBoost model to obtain the results, and adaptively select whether to use TCP+TLS or QUIC for intranet penetration.
+- - Requirements: There is an intranet server and a public network server, and id1.example.com resolves to the address of the public network server. Hopefully by accessing id1.example.com:8080
+    To access the web page served by port 80 on the intranet server. GT server listens to multiple addresses. GT client provides multiple `-remote` options and currently supports intelligent switching between QUIC and TCP/TLS.
+    GT client concurrently sends multiple sets of network status detection probes through QUIC connections to obtain the network delay and packet loss rate between the intranet server and the public network server.
+    Input the trained XGBoost model to obtain the results, and adaptively select whether to use TCP+TLS or QUIC for intranet penetration.
 
 - Server (public network server)
 
 ```shell
-./release/linux-amd64-server -addr 8080 -autoAddr 443 -certFile /root/openssl_crt/tls.crt -keyFile /root/openssl_crt/tls.key -id id1 -secret secret1
+./release/linux-amd64-server -addr 8080 -quicAddr 443 -certFile /root/openssl_crt/tls.crt -keyFile /root/openssl_crt/tls.key -id id1 -secret secret1
 ```
 
-- Client (intranet server). If QUIC is selected, a self-signed certificate is required, so the `-remoteCertInsecure` option is used.
+- Client (intranet server). `-remote` requires at least one QUIC address to be given.
 
 ```shell
-./release/linux-amd64-client -local http://127.0.0.1:80 -remote auto://id1.example.com:443 -remoteCertInsecure -id id1 -secret secret1
+./release/linux-amd64-client -local http://127.0.0.1:80 -remote quic://id1.example.com:443 -remote tcp://id1.example.com:8080 -remoteCertInsecure -id id1 -secret secret1
 ```
 
 #### Client Start Multiple Services Simultaneously

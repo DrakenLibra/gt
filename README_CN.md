@@ -341,19 +341,20 @@ options:
 #### 智能内网穿透（自适应选择 TCP/QUIC ）
 
 - 需求：有一台内网服务器和一台公网服务器，id1.example.com 解析到公网服务器的地址。希望通过访问 id1.example.com:8080
-  来访问内网服务器上 80 端口服务的网页。GT client 并发发送多组网络状况探测探针，获取内网服务器和公网服务器之间网络的时延和丢包率，
+  来访问内网服务器上 80 端口服务的网页。GT server监听多个地址，GT client给出了多个 `-remote` 选项，目前支持在 QUIC 和 TCP/TLS 之间进行智能切换。 
+  GT client 通过 QUIC 连接并发发送多组网络状况探测探针，获取内网服务器和公网服务器之间网络的时延和丢包率，
   输入训练好的XGBoost模型获取结果，自适应选择使用 TCP+TLS 还是 QUIC 进行内网穿透。
 
 - 服务端（公网服务器）
 
 ```shell
-./release/linux-amd64-server -addr 8080 -autoAddr 443 -certFile /root/openssl_crt/tls.crt -keyFile /root/openssl_crt/tls.key -id id1 -secret secret1
+./release/linux-amd64-server -addr 8080 -quicAddr 443 -certFile /root/openssl_crt/tls.crt -keyFile /root/openssl_crt/tls.key -id id1 -secret secret1
 ```
 
-- 客户端（内网服务器）。如果选择了QUIC则需要使用自签名证书，所以使用了 `-remoteCertInsecure` 选项。
+- 客户端（内网服务器）。`-remote` 需要给出至少一个 QUIC 的地址。
 
 ```shell
-./release/linux-amd64-client -local http://127.0.0.1:80 -remote auto://id1.example.com:443 -remoteCertInsecure -id id1 -secret secret1
+./release/linux-amd64-client -local http://127.0.0.1:80 -remote quic://id1.example.com:443 -remote tcp://id1.example.com:8080 -remoteCertInsecure -id id1 -secret secret1
 ```
 
 #### 客户端同时开启多个服务
