@@ -215,6 +215,7 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 		go func() {
 			err = conn.(*QuicConnection).SendMessage([]byte(time.Now().Format("2006-01-02 15:04:05")))
 			if err != nil {
+				fmt.Println("sendMessage", err)
 				return
 			}
 			//wg.Done()
@@ -246,6 +247,7 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 		if err != nil {
 			if err.Error() == myError.Error() {
 				fmt.Println("success", err.Error(), time.Now())
+				err = nil
 				break
 			} else {
 				return
