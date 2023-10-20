@@ -19,6 +19,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"github.com/quic-go/quic-go"
 	"io"
 	"net"
 	"runtime/debug"
@@ -165,15 +166,26 @@ func (c *conn) handle(handleFunc func() bool) {
 			return
 		case 0x02:
 			var buf []byte
+
+			myError := quic.ApplicationError{
+				Remote:       false,
+				ErrorCode:    0x42,
+				ErrorMessage: "close QUIC probe connection",
+			}
+
 			for {
 				timer := time.AfterFunc(3*time.Second, func() {
 					fmt.Println("closing conn")
 					c.Close()
 				})
 				if buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage(); err != nil {
-					fmt.Println("1", err)
-					fmt.Println(time.Now())
-					break
+					ok := quic.ApplicationError.Is(myError, err)
+					if ok {
+						fmt.Println("success", err, time.Now())
+						break
+					} else {
+						return
+					}
 				}
 				err = c.Connection.Conn.(*connection.QuicConnection).SendMessage(buf)
 				if err != nil {

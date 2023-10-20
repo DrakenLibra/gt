@@ -221,6 +221,11 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 		}()
 	}
 	//wg.Wait()
+	myError := quic.ApplicationError{
+		Remote:       false,
+		ErrorCode:    0x42,
+		ErrorMessage: "close QUIC probe connection",
+	}
 
 	var buf []byte
 	for {
@@ -232,10 +237,17 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 			}
 		})
 		buf, err = conn.(*QuicConnection).ReceiveMessage()
-		fmt.Println(buf)
+		if buf != nil {
+			fmt.Println(buf)
+		}
 		if err != nil {
-			fmt.Println(err.Error(), time.Now())
-			break
+			ok := quic.ApplicationError.Is(myError, err)
+			if ok {
+				fmt.Println("success", err.Error(), time.Now())
+				break
+			} else {
+				return
+			}
 		}
 		timer.Stop()
 	}
