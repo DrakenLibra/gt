@@ -177,7 +177,7 @@ func (c *conn) handle(handleFunc func() bool) {
 			for {
 				timer := time.AfterFunc(3*time.Second, func() {
 					fmt.Println("closing conn")
-					c.Close()
+					//c.Close()
 				})
 				if buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage(); err != nil {
 					//ok := myError.Is(err)

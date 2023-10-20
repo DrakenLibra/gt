@@ -235,6 +235,7 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 			fmt.Println("closing conn")
 			err = conn.(*QuicConnection).CloseWithError(0x42, "close QUIC probe connection")
 			if err != nil {
+				fmt.Println("timer", err)
 				return
 			}
 		})
