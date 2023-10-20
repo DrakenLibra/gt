@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"github.com/quic-go/quic-go"
 	"io"
 	"net"
@@ -167,30 +166,27 @@ func (c *conn) handle(handleFunc func() bool) {
 		case 0x02:
 			var buf []byte
 
-			myError := &quic.ApplicationError{
+			probeCloseError := &quic.ApplicationError{
 				Remote:       true,
 				ErrorCode:    0x42,
 				ErrorMessage: "close QUIC probe connection",
 			}
-			//fmt.Println(myError.Error())
 
 			for {
 				timer := time.AfterFunc(3*time.Second, func() {
-					fmt.Println("closing conn")
-					//c.Close()
+					c.Logger.Info().Msg("closing QUIC probe connection")
 				})
 				if buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage(); err != nil {
-					//ok := myError.Is(err)
-					if err.Error() == myError.Error() {
-						fmt.Println("success", err, time.Now())
+					if err.Error() == probeCloseError.Error() {
 						break
 					} else {
+						c.Logger.Warn().Err(err).Msg("failed to use QUIC probe connection to receive message")
 						return
 					}
 				}
 				err = c.Connection.Conn.(*connection.QuicConnection).SendMessage(buf)
 				if err != nil {
-					fmt.Println("2", err)
+					c.Logger.Warn().Err(err).Msg("failed to use QUIC probe connection to send message")
 					return
 				}
 				timer.Stop()
