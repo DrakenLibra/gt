@@ -198,7 +198,6 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 	if err != nil {
 		return
 	}
-	//fmt.Println(addr)
 
 	sendBuffer := []byte{predef.MagicNumber, 0x02}
 	_, err = conn.Write(sendBuffer)
@@ -208,64 +207,56 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 
 	totalNum := 100
 
-	//var wg sync.WaitGroup
-	//wg.Add(totalNum)
+	var totalSuccessNum int64 = 0
+	var totalDelay int64 = 0
 
 	for i := 0; i < totalNum; i++ {
 		go func() {
-			err = conn.(*QuicConnection).SendMessage([]byte(time.Now().Format("2006-01-02 15:04:05")))
+			err = conn.(*QuicConnection).SendMessage([]byte(time.Now().Format("2006-01-02 15:04:05.000000000")))
 			if err != nil {
-				fmt.Println("sendMessage", err)
 				return
 			}
-			//wg.Done()
 		}()
 	}
-	//wg.Wait()
-	myError := &quic.ApplicationError{
+
+	probeCloseError := &quic.ApplicationError{
 		Remote:       false,
 		ErrorCode:    0x42,
 		ErrorMessage: "close QUIC probe connection",
 	}
-	//fmt.Println(myError.Error())
-	//fmt.Println(net.ErrClosed)
 
 	var buf []byte
 	for {
 		timer := time.AfterFunc(3*time.Second, func() {
-			fmt.Println("closing conn")
 			err = conn.(*QuicConnection).CloseWithError(0x42, "close QUIC probe connection")
 			if err != nil {
-				fmt.Println("timer", err)
 				return
 			}
 		})
 		buf, err = conn.(*QuicConnection).ReceiveMessage()
-		if buf != nil {
-			fmt.Println(buf)
-		}
 		if err != nil {
-			if err.Error() == myError.Error() {
-				fmt.Println("success", err.Error(), time.Now())
+			// QUIC的stream关闭时会返回io.EOF，但是QUIC的不可靠数据包Datagram是在connection层面进行发送的
+			// 因此需要通过quic.ApplicationError判断QUIC connection是否由于应用程序主动关闭
+			if err.Error() == probeCloseError.Error() {
 				err = nil
 				break
 			} else {
 				return
 			}
 		}
+		if buf != nil {
+			sendTine, _ := time.ParseInLocation("2006-01-02 15:04:05.000000000", string(buf), time.Local)
+			interval := time.Now().Sub(sendTine).Microseconds()
+			atomic.AddInt64(&totalSuccessNum, 1)
+			atomic.AddInt64(&totalDelay, interval)
+		}
 		timer.Stop()
 	}
 
-	//for {
-	//	readBuffer, err = conn.(*QuicConnection).ReceiveMessage()
-	//	fmt.Println(string(readBuffer))
-	//	if conn == nil {
-	//		fmt.Println("connection has closed")
-	//		break
-	//	}
-	//}
+	avgRtt = float64(atomic.LoadInt64(&totalDelay)) / (float64(1000 * totalNum))
+	pktLoss = 1 - float64(atomic.LoadInt64(&totalSuccessNum))/float64(totalNum)
 
-	avgRtt = 0
-	pktLoss = 0
+	fmt.Println(avgRtt, pktLoss)
+
 	return
 }
