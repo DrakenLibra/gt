@@ -168,10 +168,11 @@ func (c *conn) handle(handleFunc func() bool) {
 			var buf []byte
 
 			myError := &quic.ApplicationError{
-				Remote:       false,
+				Remote:       true,
 				ErrorCode:    0x42,
 				ErrorMessage: "close QUIC probe connection",
 			}
+			fmt.Println(myError.Error())
 
 			for {
 				timer := time.AfterFunc(3*time.Second, func() {

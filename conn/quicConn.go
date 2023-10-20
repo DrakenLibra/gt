@@ -226,6 +226,8 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 		ErrorCode:    0x42,
 		ErrorMessage: "close QUIC probe connection",
 	}
+	fmt.Printf(myError.Error())
+	fmt.Println(net.ErrClosed)
 
 	var buf []byte
 	for {
