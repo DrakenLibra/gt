@@ -167,7 +167,7 @@ func (c *conn) handle(handleFunc func() bool) {
 		case 0x02:
 			var buf []byte
 
-			myError := quic.ApplicationError{
+			myError := &quic.ApplicationError{
 				Remote:       false,
 				ErrorCode:    0x42,
 				ErrorMessage: "close QUIC probe connection",
@@ -179,7 +179,7 @@ func (c *conn) handle(handleFunc func() bool) {
 					c.Close()
 				})
 				if buf, err = c.Connection.Conn.(*connection.QuicConnection).ReceiveMessage(); err != nil {
-					ok := quic.ApplicationError.Is(myError, err)
+					ok := myError.Is(err)
 					if ok {
 						fmt.Println("success", err, time.Now())
 						break
