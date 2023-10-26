@@ -187,6 +187,7 @@ check_msquic_dependencies:
 	sh -c "command -v cmake"
 
 compile_msquic: check_msquic_dependencies update_submodule
-	cd ./dep/msquic && mkdir build && cd build
+	cd ./dep/msquic
+	mkdir build && cd build
 	cmake -G 'Unix Makefiles' ..
 	cmake --build .
