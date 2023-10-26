@@ -305,8 +305,16 @@ func (s *Server) Start() (err error) {
 		listening = true
 	}
 	if len(s.config.QuicAddr) > 0 {
-		if strings.IndexByte(s.config.QuicAddr, ':') == -1 {
-			s.config.QuicAddr = ":" + s.config.QuicAddr
+		//if strings.IndexByte(s.config.QuicAddr, ':') == -1 {
+		//	s.config.QuicAddr = ":" + s.config.QuicAddr
+		//}
+		// TODO Go 的冒号加空格会同时监听 IPv4 和 IPv6，这里行为与其他的不一致
+		colonIndex := strings.IndexByte(s.config.QuicAddr, ':')
+		if colonIndex == -1 {
+			s.config.QuicAddr = "0.0.0.0:" + s.config.QuicAddr
+		}
+		if colonIndex == 0 {
+			s.config.QuicAddr = "0.0.0.0" + s.config.QuicAddr
 		}
 		err = s.quicListen(s.config.OpenBBR)
 		if err != nil {

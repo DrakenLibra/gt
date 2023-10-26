@@ -403,12 +403,14 @@ func (c *Client) Start() (err error) {
 	var dialer dialer
 	if len(c.Config().Remote) > 0 {
 		var hasQuic bool
+		var enterSwitch bool
 		for index, _ := range c.Config().Remote {
 			if !strings.Contains(c.Config().Remote[index], "://") {
 				c.Config().Remote[index] = "tcp://" + c.Config().Remote[index]
 			}
 		}
 		if len(c.Config().Remote) >= 2 {
+			enterSwitch = true
 			for index, remote := range c.Config().Remote {
 				var u *url.URL
 				u, err = url.Parse(remote)
@@ -449,7 +451,9 @@ func (c *Client) Start() (err error) {
 		} else {
 			c.chosenRemoteLabel = 0
 		}
-		c.Logger.Info().Str("remote", c.Config().Remote[c.chosenRemoteLabel]).Msg("intelligent switch strategy finally choose to establish with")
+		if enterSwitch {
+			c.Logger.Info().Str("remote", c.Config().Remote[c.chosenRemoteLabel]).Msg("intelligent switch strategy finally choose to establish with")
+		}
 		err = dialer.initWithRemote(c)
 		if err != nil {
 			return
