@@ -53,8 +53,15 @@ export GOOS?=$(shell go env GOOS)
 export GOARCH?=$(shell go env GOARCH)
 export CC=$(TARGET)-gcc -w
 export CXX=$(TARGET)-g++ -w
-export CGO_CXXFLAGS=-I$(shell pwd)/dep/_google-webrtc/src -I$(shell pwd)/dep/_google-webrtc/src/third_party/abseil-cpp -std=c++17 -DWEBRTC_POSIX
-export CGO_LDFLAGS=$(shell pwd)/dep/_google-webrtc/src/out/release-$(TARGET)/obj/libwebrtc.a -ldl -pthread
+#export CGO_CXXFLAGS=-I$(shell pwd)/dep/_google-webrtc/src -I$(shell pwd)/dep/_google-webrtc/src/third_party/abseil-cpp -std=c++17 -DWEBRTC_POSIX
+export CGO_CXXFLAGS=-I$(shell pwd)/dep/_google-webrtc/src \
+	-I$(shell pwd)/dep/_google-webrtc/src/third_party/abseil-cpp \
+	-I$(shell pwd)/dep/msquic/src/inc \
+	-std=c++17 -DWEBRTC_POSIX -DQUIC_API_ENABLE_PREVIEW_FEATURES
+#export CGO_LDFLAGS=$(shell pwd)/dep/_google-webrtc/src/out/release-$(TARGET)/obj/libwebrtc.a -ldl -pthread
+export CGO_LDFLAGS= $(shell pwd)/dep/_google-webrtc/src/out/release-$(TARGET)/obj/libwebrtc.a \
+ 	$(shell pwd)/dep/msquic/$(TARGET)/bin/Release/libmsquic.a \
+	-ldl -pthread -lnuma
 export CGO_ENABLED=1
 
 .PHONY: all build docker_build_linux_arm64 fmt build_client docker_build_linux_arm64_client gofumpt build_server docker_build_linux_arm64_server golangci-lint check_webrtc_dependencies docker_release_linux_amd64 release clean docker_release_linux_amd64_client release_client compile_webrtc docker_release_linux_amd64_server release_server docker_create_image docker_build_linux_amd64 docker_release_linux_arm64 revive docker_build_linux_amd64_client docker_release_linux_arm64_client test docker_build_linux_amd64_server docker_release_linux_arm64_server update_submodule check_msquic_dependencies compile_msquic
