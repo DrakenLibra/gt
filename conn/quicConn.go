@@ -8,7 +8,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	quicbbr "github.com/DrakenLibra/gt-bbr"
 	"github.com/isrc-cas/gt/predef"
 	"github.com/quic-go/quic-go"
 	"math/big"
@@ -22,29 +21,30 @@ type QuicConnection struct {
 	quic.Stream
 }
 
-type QuicBbrConnection struct {
-	quicbbr.Session
-	quicbbr.Stream
-}
+//type QuicBbrConnection struct {
+//	quicbbr.Session
+//	quicbbr.Stream
+//}
 
 type QuicListener struct {
 	quic.Listener
 }
 
-type QuicBbrListener struct {
-	quicbbr.Listener
-}
+//type QuicBbrListener struct {
+//	quicbbr.Listener
+//}
 
 var _ net.Conn = &QuicConnection{}
 var _ net.Listener = &QuicListener{}
-var _ net.Conn = &QuicBbrConnection{}
-var _ net.Listener = &QuicBbrListener{}
 
-func (c *QuicBbrConnection) Close() error {
-	err := c.Stream.Close()
-	err = c.Session.Close()
-	return err
-}
+//var _ net.Conn = &QuicBbrConnection{}
+//var _ net.Listener = &QuicBbrListener{}
+
+//func (c *QuicBbrConnection) Close() error {
+//	err := c.Stream.Close()
+//	err = c.Session.Close()
+//	return err
+//}
 
 func QuicDial(addr string, config *tls.Config) (net.Conn, error) {
 	config.NextProtos = []string{"gt-quic"}
@@ -63,22 +63,22 @@ func QuicDial(addr string, config *tls.Config) (net.Conn, error) {
 	return nc, err
 }
 
-func QuicBbrDial(addr string, config *tls.Config) (net.Conn, error) {
-	config.NextProtos = []string{"gt-quic"}
-	conn, err := quicbbr.DialAddr(addr, config, &quicbbr.Config{})
-	if err != nil {
-		panic(err)
-	}
-	stream, err := conn.OpenStreamSync()
-	if err != nil {
-		panic(err)
-	}
-	nc := &QuicBbrConnection{
-		Session: conn,
-		Stream:  stream,
-	}
-	return nc, err
-}
+//func QuicBbrDial(addr string, config *tls.Config) (net.Conn, error) {
+//	config.NextProtos = []string{"gt-quic"}
+//	conn, err := quicbbr.DialAddr(addr, config, &quicbbr.Config{})
+//	if err != nil {
+//		panic(err)
+//	}
+//	stream, err := conn.OpenStreamSync()
+//	if err != nil {
+//		panic(err)
+//	}
+//	nc := &QuicBbrConnection{
+//		Session: conn,
+//		Stream:  stream,
+//	}
+//	return nc, err
+//}
 
 func QuicListen(addr string, config *tls.Config) (net.Listener, error) {
 	config.NextProtos = []string{"gt-quic"}
@@ -92,17 +92,17 @@ func QuicListen(addr string, config *tls.Config) (net.Listener, error) {
 	return ln, err
 }
 
-func QuicBbrListen(addr string, config *tls.Config) (net.Listener, error) {
-	config.NextProtos = []string{"gt-quic"}
-	listener, err := quicbbr.ListenAddr(addr, config, &quicbbr.Config{})
-	if err != nil {
-		panic(err)
-	}
-	ln := &QuicBbrListener{
-		Listener: listener,
-	}
-	return ln, err
-}
+//func QuicBbrListen(addr string, config *tls.Config) (net.Listener, error) {
+//	config.NextProtos = []string{"gt-quic"}
+//	listener, err := quicbbr.ListenAddr(addr, config, &quicbbr.Config{})
+//	if err != nil {
+//		panic(err)
+//	}
+//	ln := &QuicBbrListener{
+//		Listener: listener,
+//	}
+//	return ln, err
+//}
 
 func (ln *QuicListener) Accept() (net.Conn, error) {
 	conn, _ := ln.Listener.Accept(context.Background())
@@ -114,15 +114,15 @@ func (ln *QuicListener) Accept() (net.Conn, error) {
 	return nc, err
 }
 
-func (ln *QuicBbrListener) Accept() (net.Conn, error) {
-	conn, _ := ln.Listener.Accept()
-	stream, err := conn.AcceptStream()
-	nc := &QuicBbrConnection{
-		Session: conn,
-		Stream:  stream,
-	}
-	return nc, err
-}
+//func (ln *QuicBbrListener) Accept() (net.Conn, error) {
+//	conn, _ := ln.Listener.Accept()
+//	stream, err := conn.AcceptStream()
+//	nc := &QuicBbrConnection{
+//		Session: conn,
+//		Stream:  stream,
+//	}
+//	return nc, err
+//}
 
 func GenerateTLSConfig() *tls.Config {
 	ecdsaKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)

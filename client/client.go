@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/isrc-cas/gt/quic"
+	"github.com/isrc-cas/gt/conn/msquic"
 	"io"
 	"net"
 	"net/http"
@@ -319,39 +319,8 @@ func (d *dialer) quicDial() (conn net.Conn, err error) {
 	return connection.QuicDial(d.host, d.tlsConfig)
 }
 
-//func (d *dialer) quicBbrDial() (conn net.Conn, err error) {
-//	return connection.QuicBbrDial(d.host, d.tlsConfig)
-//}
-
-// my try from 327 to 355
-type quicIscasConn struct {
-	net.Conn // *quic.stream
-	parent   *quic.Connection
-}
-
-func (q *quicIscasConn) Close() (err error) {
-	err1 := q.Conn.Close()
-	err2 := q.parent.Close()
-	if err1 != nil {
-		return err1
-	}
-	return err2
-}
-
 func (d *dialer) quicBbrDial() (conn net.Conn, err error) {
-	parent, err := quic.NewConnection(d.host, 10_000, "", true)
-	if err != nil {
-		return
-	}
-	stream, err := parent.OpenStream()
-	if err != nil {
-		return
-	}
-	conn = &quicIscasConn{
-		Conn:   stream,
-		parent: parent,
-	}
-	return
+	return msquic.QuicBbrDial(d.host, d.tlsConfig)
 }
 
 // Start runs the client agent.

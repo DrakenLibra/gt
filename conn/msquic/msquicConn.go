@@ -2,82 +2,36 @@ package msquic
 
 import (
 	"crypto/tls"
+	"github.com/isrc-cas/gt/quic"
 	"net"
-	"time"
 )
 
-type MsquicConn struct {
+type QuicIscasConn struct {
+	net.Conn // *quic.stream
+	parent   *quic.Connection
 }
 
-type MsquicListener struct {
+func (q *QuicIscasConn) Close() (err error) {
+	err1 := q.Conn.Close()
+	err2 := q.parent.Close()
+	if err1 != nil {
+		return err1
+	}
+	return err2
 }
 
-var _ net.Conn = &MsquicConn{}
-var _ net.Listener = &MsquicListener{}
-
-func MsquicDial(addr string, config *tls.Config) (net.Conn, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func MsquicListen(addr string, config *tls.Config) (net.Listener, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mc *MsquicConn) Read(b []byte) (n int, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mc *MsquicConn) Write(b []byte) (n int, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mc *MsquicConn) Close() error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mc *MsquicConn) LocalAddr() net.Addr {
-	//TODO implement me
-	//Because this function has not used in gt yet, we have not implemented it.
-	panic("implement me")
-}
-
-func (mc *MsquicConn) RemoteAddr() net.Addr {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mc *MsquicConn) SetDeadline(t time.Time) error {
-	//TODO implement me
-	//Because this function has not used in gt yet, we have not implemented it.
-	panic("implement me")
-}
-
-func (mc *MsquicConn) SetReadDeadline(t time.Time) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mc *MsquicConn) SetWriteDeadline(t time.Time) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MsquicListener) Accept() (net.Conn, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MsquicListener) Close() error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MsquicListener) Addr() net.Addr {
-	//TODO implement me
-	panic("implement me")
+func QuicBbrDial(addr string, config *tls.Config) (conn net.Conn, err error) {
+	parent, err := quic.NewConnection(addr, 10_000, "", true)
+	if err != nil {
+		return
+	}
+	stream, err := parent.OpenStream()
+	if err != nil {
+		return
+	}
+	conn = &QuicIscasConn{
+		Conn:   stream,
+		parent: parent,
+	}
+	return
 }
