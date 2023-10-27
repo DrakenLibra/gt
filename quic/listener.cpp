@@ -43,6 +43,7 @@ class Listener {
             CertificateFile.PrivateKeyFile = keyFile;
             CertificateFile.CertificateFile = certFile;
             CredConfig.CertificateFile = &CertificateFile;
+            std::cout << "key and cert" << keyFile << "|" << keyFile << std::endl;
         } else {
             std::cout << "Has password" << std::endl;
             CredConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE_PROTECTED;
@@ -132,7 +133,7 @@ void *NewListener(char *addr, uint64_t idleTimeoutMs, char *keyFile, char *certF
                   void *context) {
     auto listener = new Listener(context);
     std::cout << "success new Listener" << std::endl;
-    auto ok = listener->Start(addr, idleTimeoutMs, &keyFile, &certFile, password);
+    auto ok = listener->Start(addr, idleTimeoutMs, keyFile, certFile, password);
     std::cout << "key and cert" << keyFile << "|" << certFile << std::endl;
     std::cout << "key and cert" << &keyFile << "|" << &certFile << std::endl;
     if (!ok) {
