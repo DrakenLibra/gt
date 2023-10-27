@@ -30,6 +30,7 @@ class Listener {
         QUIC_STATUS status = MsQuic->ConfigurationOpen(Registration, &ALPN, 1, &settings,
                                                        sizeof(settings), NULL, &configuration);
         if (QUIC_FAILED(status)) {
+            std::cout << "fail in MsQuic->ConfigurationOpen" << std::endl;
             return false;
         }
 
@@ -51,6 +52,7 @@ class Listener {
         }
         status = MsQuic->ConfigurationLoadCredential(configuration, &CredConfig);
         if (QUIC_FAILED(status)) {
+            std::cout << "fail in MsQuic->ConfigurationLoadCredential" << std::endl;
             return false;
         }
 
@@ -59,16 +61,19 @@ class Listener {
         };
         status = MsQuic->ListenerOpen(Registration, cb, this, &listener);
         if (QUIC_FAILED(status)) {
+            std::cout << "fail in MsQuic->ListenerOpen" << std::endl;
             return false;
         }
 
         QUIC_ADDR quicAddr;
         auto ok = QuicAddrFromString(addr, 0, &quicAddr);
         if (!ok) {
+            std::cout << "fail in QuicAddrFromString" << std::endl;
             return false;
         }
         status = MsQuic->ListenerStart(listener, &ALPN, 1, &quicAddr);
         if (QUIC_FAILED(status)) {
+            std::cout << "fail in ListenerStart" << std::endl;
             return false;
         }
 
