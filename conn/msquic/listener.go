@@ -10,6 +10,7 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"unsafe"
 
@@ -43,6 +44,10 @@ func NewListenr(
 	defer C.free(unsafe.Pointer(cCertFile))
 	cPassword := C.CString(password)
 	defer C.free(unsafe.Pointer(cPassword))
+	fmt.Println("keyFile", keyFile)
+	fmt.Println("cKeyFile", cKeyFile)
+	fmt.Println("certFile", certFile)
+	fmt.Println("cCertFile", cCertFile)
 	listener.cppListener = C.NewListener(
 		cAddr,
 		C.uint64_t(idleTimeoutMs),
