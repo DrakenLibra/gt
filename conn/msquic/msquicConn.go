@@ -23,7 +23,7 @@ func (q *MsquicConn) Close() (err error) {
 
 func MsquicDial(addr string, config *tls.Config) (conn net.Conn, err error) {
 	unsecure := config.InsecureSkipVerify
-	parent, err := NewConnection(addr, 10_000, "", unsecure)
+	parent, err := NewConnection(addr, 100000, "", unsecure)
 	if err != nil {
 		return
 	}
