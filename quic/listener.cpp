@@ -124,7 +124,7 @@ class Listener {
 void *NewListener(char *addr, uint64_t idleTimeoutMs, char *keyFile, char *certFile, char *password,
                   void *context) {
     auto listener = new Listener(context);
-    std::cout << "success new Listener" << endl;
+    std::cout << "success new Listener" << std::endl;
     auto ok = listener->Start(addr, idleTimeoutMs, keyFile, certFile, password);
     if (!ok) {
         delete listener;
