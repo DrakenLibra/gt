@@ -37,12 +37,14 @@ class Listener {
         QUIC_CREDENTIAL_CONFIG CredConfig = {};
         CredConfig.Flags = QUIC_CREDENTIAL_FLAG_NONE;
         if (strlen(password) == 0) {
+            std::cout << "No password" << std::endl;
             CredConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE;
             QUIC_CERTIFICATE_FILE CertificateFile = {};
             CertificateFile.PrivateKeyFile = keyFile;
             CertificateFile.CertificateFile = certFile;
             CredConfig.CertificateFile = &CertificateFile;
         } else {
+            std::cout << "Has password" << std::endl;
             CredConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE_PROTECTED;
             QUIC_CERTIFICATE_FILE_PROTECTED certFileProtected = {};
             certFileProtected.PrivateKeyFile = keyFile;
@@ -131,6 +133,7 @@ void *NewListener(char *addr, uint64_t idleTimeoutMs, char *keyFile, char *certF
     auto listener = new Listener(context);
     std::cout << "success new Listener" << std::endl;
     auto ok = listener->Start(addr, idleTimeoutMs, keyFile, certFile, password);
+    std::cout << "key and cert" << keyFile << certFile << std::endl;
     if (!ok) {
         delete listener;
         listener = nullptr;
