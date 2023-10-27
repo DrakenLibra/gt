@@ -53,12 +53,10 @@ export GOOS?=$(shell go env GOOS)
 export GOARCH?=$(shell go env GOARCH)
 export CC=$(TARGET)-gcc -w
 export CXX=$(TARGET)-g++ -w
-#export CGO_CXXFLAGS=-I$(shell pwd)/dep/_google-webrtc/src -I$(shell pwd)/dep/_google-webrtc/src/third_party/abseil-cpp -std=c++17 -DWEBRTC_POSIX
 export CGO_CXXFLAGS=-I$(shell pwd)/dep/_google-webrtc/src \
 	-I$(shell pwd)/dep/_google-webrtc/src/third_party/abseil-cpp \
 	-I$(shell pwd)/dep/msquic/src/inc \
 	-std=c++17 -DWEBRTC_POSIX -DQUIC_API_ENABLE_PREVIEW_FEATURES
-#export CGO_LDFLAGS=$(shell pwd)/dep/_google-webrtc/src/out/release-$(TARGET)/obj/libwebrtc.a -ldl -pthread
 export CGO_LDFLAGS= $(shell pwd)/dep/_google-webrtc/src/out/release-$(TARGET)/obj/libwebrtc.a \
  	$(shell pwd)/dep/msquic/$(TARGET)/bin/Release/libmsquic.a \
 	-ldl -pthread -lnuma
@@ -194,10 +192,9 @@ check_msquic_dependencies:
 	sh -c "command -v cmake"
 
 compile_msquic: check_msquic_dependencies update_submodule
-	#cd ./dep/msquic && mkdir -p build && cd build && cmake -G 'Unix Makefiles' .. && cmake --build .
 	mkdir -p ./dep/msquic/$(TARGET)
-	sed -i 's|\(^ *msquic_lib\)$$|\1 ALL|g' ./dep/msquic/src/bin/CMakeLists.txt
+	#sed -i 's|\(^ *msquic_lib\)$$|\1 ALL|g' ./dep/msquic/src/bin/CMakeLists.txt
 	cmake -B./dep/msquic/$(TARGET) -S./dep/msquic -DQUIC_BUILD_SHARED=OFF -DCMAKE_TARGET_ARCHITECTURE=$(TARGET_CPU)
 	make -C./dep/msquic/$(TARGET) -j$(shell nproc)
-	@renameSymbols=$$(objdump -t ./dep/msquic/$(TARGET)/bin/Release/libmsquic.a | awk -v RS= '/_YB80VJ/{next}1' | grep -E 'g +(F|O) ' | grep -Evi ' (ms){0,1}quic' | awk '{print " --redefine-sym " $$NF "=" $$NF "_YB80VJ"}') && \
+	#@renameSymbols=$$(objdump -t ./dep/msquic/$(TARGET)/bin/Release/libmsquic.a | awk -v RS= '/_YB80VJ/{next}1' | grep -E 'g +(F|O) ' | grep -Evi ' (ms){0,1}quic' | awk '{print " --redefine-sym " $$NF "=" $$NF "_YB80VJ"}') && \
     		objcopy $$renameSymbols ./dep/msquic/$(TARGET)/bin/Release/libmsquic.a
