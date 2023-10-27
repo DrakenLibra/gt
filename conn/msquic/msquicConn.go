@@ -5,7 +5,7 @@ import (
 	"net"
 )
 
-const msquicIdleTimeOutMs = 1000
+const msquicIdleTimeOutMs uint64 = 10000
 
 type MsquicConn struct {
 	net.Conn // *quic.stream
