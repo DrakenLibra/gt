@@ -1,6 +1,7 @@
 #include "listener.h"
 #include "connection.hpp"
 #include "quic.hpp"
+#include <iostream>
 
 class Listener {
   public:
@@ -123,10 +124,12 @@ class Listener {
 void *NewListener(char *addr, uint64_t idleTimeoutMs, char *keyFile, char *certFile, char *password,
                   void *context) {
     auto listener = new Listener(context);
+    std::cout << "success new Listener" << endl;
     auto ok = listener->Start(addr, idleTimeoutMs, keyFile, certFile, password);
     if (!ok) {
         delete listener;
         listener = nullptr;
+        std::cout << "fail to start new Listener" << endl;
     }
     return listener;
 }
