@@ -19,7 +19,6 @@ import (
 	"github.com/mattn/go-pointer"
 )
 
-// Connection 直接读写是 UDP。OpenStream 才是 TCP。
 type Connection struct {
 	cppConn             unsafe.Pointer
 	pointerID           unsafe.Pointer
@@ -72,6 +71,7 @@ func NewConnection(
 	}
 }
 
+// TODO quic connection层面的read和write主要指DATAGRAM扩展，有待实现
 func (c *Connection) Read(b []byte) (n int, err error) {
 	panic("not implemented")
 }

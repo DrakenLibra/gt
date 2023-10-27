@@ -8,13 +8,13 @@ import (
 const msquicIdleTimeOutMs uint64 = 100_000
 
 type MsquicConn struct {
-	net.Conn // *quic.stream
-	Parent   *Connection
+	net.Conn         // *stream
+	MsquicConnection *Connection
 }
 
 func (q *MsquicConn) Close() (err error) {
 	err1 := q.Conn.Close()
-	err2 := q.Parent.Close()
+	err2 := q.MsquicConnection.Close()
 	if err1 != nil {
 		return err1
 	}
@@ -23,17 +23,17 @@ func (q *MsquicConn) Close() (err error) {
 
 func MsquicDial(addr string, config *tls.Config) (conn net.Conn, err error) {
 	unsecure := config.InsecureSkipVerify
-	parent, err := NewConnection(addr, msquicIdleTimeOutMs, "", unsecure)
+	msquicConnection, err := NewConnection(addr, msquicIdleTimeOutMs, "", unsecure)
 	if err != nil {
 		return
 	}
-	stream, err := parent.OpenStream()
+	stream, err := msquicConnection.OpenStream()
 	if err != nil {
 		return
 	}
 	conn = &MsquicConn{
-		Conn:   stream,
-		Parent: parent,
+		Conn:             stream,
+		MsquicConnection: msquicConnection,
 	}
 	return
 }
