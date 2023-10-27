@@ -27,11 +27,11 @@ class Listener {
         settings.IsSet.ServerResumptionLevel = true;
         settings.PeerBidiStreamCount = 1024;
         settings.IsSet.PeerBidiStreamCount = true;
-//        QUIC_STATUS status = MsQuic->ConfigurationOpen(Registration, &ALPN, 1, &settings,
-//                                                       sizeof(settings), NULL, &configuration);
-//        if (QUIC_FAILED(status)) {
-//            return false;
-//        }
+        QUIC_STATUS status = MsQuic->ConfigurationOpen(Registration, &ALPN, 1, &settings,
+                                                       sizeof(settings), NULL, &configuration);
+        if (QUIC_FAILED(status)) {
+            return false;
+        }
 
         QUIC_CREDENTIAL_CONFIG CredConfig = {};
         CredConfig.Flags = QUIC_CREDENTIAL_FLAG_NONE;
@@ -41,7 +41,7 @@ class Listener {
             CertificateFile.PrivateKeyFile = keyFile;
             CertificateFile.CertificateFile = certFile;
             CredConfig.CertificateFile = &CertificateFile;
-//            std::cout << "key and cert : " << keyFile << " | " << certFile << std::endl;
+            std::cout << "key and cert : " << keyFile << " | " << certFile << std::endl;
         } else {
             CredConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE_PROTECTED;
             QUIC_CERTIFICATE_FILE_PROTECTED certFileProtected = {};
@@ -49,11 +49,6 @@ class Listener {
             certFileProtected.CertificateFile = certFile;
             certFileProtected.PrivateKeyPassword = password;
             CredConfig.CertificateFileProtected = &certFileProtected;
-        }
-
-        QUIC_STATUS status = MsQuic->ConfigurationOpen(Registration, &ALPN, 1, &settings, sizeof(settings), NULL, &configuration);
-        if (QUIC_FAILED(status)) {
-            return false;
         }
 
         status = MsQuic->ConfigurationLoadCredential(configuration, &CredConfig);
