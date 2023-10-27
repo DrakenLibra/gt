@@ -129,7 +129,7 @@ void *NewListener(char *addr, uint64_t idleTimeoutMs, char *keyFile, char *certF
     if (!ok) {
         delete listener;
         listener = nullptr;
-        std::cout << "fail to start new Listener" << endl;
+        std::cout << "fail to start new Listener" << std::endl;
     }
     return listener;
 }
