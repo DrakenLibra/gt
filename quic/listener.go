@@ -11,6 +11,7 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"github.com/isrc-cas/gt/conn/msquic"
 	"net"
 	"unsafe"
 
@@ -84,7 +85,11 @@ func (l *Listener) Accept() (conn net.Conn, err error) {
 		if streamConn == nil {
 			return nil, errors.New("msquic AcceptStream failed")
 		}
-		return streamConn, err
+		msquicConn := &msquic.MsquicConn{
+			Conn:   streamConn,
+			Parent: newQuicConn,
+		}
+		return msquicConn, err
 	case <-l.onClose:
 		err = errors.New("listener closed")
 	}

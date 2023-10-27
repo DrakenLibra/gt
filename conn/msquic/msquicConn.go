@@ -6,14 +6,14 @@ import (
 	"net"
 )
 
-type QuicIscasConn struct {
+type MsquicConn struct {
 	net.Conn // *quic.stream
-	parent   *quic.Connection
+	Parent   *quic.Connection
 }
 
-func (q *QuicIscasConn) Close() (err error) {
+func (q *MsquicConn) Close() (err error) {
 	err1 := q.Conn.Close()
-	err2 := q.parent.Close()
+	err2 := q.Parent.Close()
 	if err1 != nil {
 		return err1
 	}
@@ -30,9 +30,9 @@ func MsquicDial(addr string, config *tls.Config) (conn net.Conn, err error) {
 	if err != nil {
 		return
 	}
-	conn = &QuicIscasConn{
+	conn = &MsquicConn{
 		Conn:   stream,
-		parent: parent,
+		Parent: parent,
 	}
 	return
 }
