@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-type msquicStruct struct {
+type MsquicStruct struct {
 	msquicConn   *msquic.Connection
 	msquicStream *msquic.Stream
 }
 
-var _ net.Conn = &msquicStruct{}
+var _ net.Conn = &MsquicStruct{}
 var _ net.Listener = &msquic.Listener{}
 
 func MsquicDial(addr string, config *tls.Config) (net.Conn, error) {
@@ -25,42 +25,42 @@ func MsquicDial(addr string, config *tls.Config) (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	conn := &msquicStruct{
+	conn := &MsquicStruct{
 		msquicStream: stream,
 		msquicConn:   parent,
 	}
 	return conn, err
 }
 
-func (q *msquicStruct) Read(b []byte) (n int, err error) {
+func (q *MsquicStruct) Read(b []byte) (n int, err error) {
 	return q.msquicStream.Read(b)
 }
 
-func (q *msquicStruct) Write(b []byte) (n int, err error) {
+func (q *MsquicStruct) Write(b []byte) (n int, err error) {
 	return q.msquicStream.Write(b)
 }
 
-func (q *msquicStruct) LocalAddr() net.Addr {
+func (q *MsquicStruct) LocalAddr() net.Addr {
 	return q.msquicStream.LocalAddr()
 }
 
-func (q *msquicStruct) RemoteAddr() net.Addr {
+func (q *MsquicStruct) RemoteAddr() net.Addr {
 	return q.msquicStream.RemoteAddr()
 }
 
-func (q *msquicStruct) SetDeadline(t time.Time) error {
+func (q *MsquicStruct) SetDeadline(t time.Time) error {
 	return q.msquicStream.SetDeadline(t)
 }
 
-func (q *msquicStruct) SetReadDeadline(t time.Time) error {
+func (q *MsquicStruct) SetReadDeadline(t time.Time) error {
 	return q.msquicStream.SetReadDeadline(t)
 }
 
-func (q *msquicStruct) SetWriteDeadline(t time.Time) error {
+func (q *MsquicStruct) SetWriteDeadline(t time.Time) error {
 	return q.msquicStream.SetWriteDeadline(t)
 }
 
-func (q *msquicStruct) Close() (err error) {
+func (q *MsquicStruct) Close() (err error) {
 	err1 := q.msquicStream.Close()
 	err2 := q.msquicConn.Close()
 	if err1 != nil {

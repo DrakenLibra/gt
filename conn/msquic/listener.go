@@ -10,10 +10,9 @@ import "C"
 
 import (
 	"errors"
+	"github.com/mattn/go-pointer"
 	"net"
 	"unsafe"
-
-	"github.com/mattn/go-pointer"
 )
 
 type Listener struct {
