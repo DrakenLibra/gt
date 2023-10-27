@@ -27,11 +27,11 @@ class Listener {
         settings.IsSet.ServerResumptionLevel = true;
         settings.PeerBidiStreamCount = 1024;
         settings.IsSet.PeerBidiStreamCount = true;
-        QUIC_STATUS status = MsQuic->ConfigurationOpen(Registration, &ALPN, 1, &settings,
-                                                       sizeof(settings), NULL, &configuration);
-        if (QUIC_FAILED(status)) {
-            return false;
-        }
+//        QUIC_STATUS status = MsQuic->ConfigurationOpen(Registration, &ALPN, 1, &settings,
+//                                                       sizeof(settings), NULL, &configuration);
+//        if (QUIC_FAILED(status)) {
+//            return false;
+//        }
 
         QUIC_CREDENTIAL_CONFIG CredConfig = {};
         CredConfig.Flags = QUIC_CREDENTIAL_FLAG_NONE;
@@ -50,6 +50,12 @@ class Listener {
             certFileProtected.PrivateKeyPassword = password;
             CredConfig.CertificateFileProtected = &certFileProtected;
         }
+
+        QUIC_STATUS status = MsQuic->ConfigurationOpen(Registration, &ALPN, 1, &settings, sizeof(settings), NULL, &configuration);
+        if (QUIC_FAILED(status)) {
+            return false;
+        }
+
         status = MsQuic->ConfigurationLoadCredential(configuration, &CredConfig);
         if (QUIC_FAILED(status)) {
             return false;
