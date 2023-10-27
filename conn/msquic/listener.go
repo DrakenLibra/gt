@@ -1,4 +1,4 @@
-package quic
+package msquic
 
 /*
 #include <stdlib.h>
@@ -11,7 +11,6 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"github.com/isrc-cas/gt/conn/msquic"
 	"net"
 	"unsafe"
 
@@ -85,7 +84,7 @@ func (l *Listener) Accept() (conn net.Conn, err error) {
 		if streamConn == nil {
 			return nil, errors.New("msquic AcceptStream failed")
 		}
-		msquicConn := &msquic.MsquicConn{
+		msquicConn := &MsquicConn{
 			Conn:   streamConn,
 			Parent: newQuicConn,
 		}

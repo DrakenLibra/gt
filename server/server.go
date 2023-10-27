@@ -21,7 +21,7 @@ import (
 	"errors"
 	"fmt"
 	connection "github.com/isrc-cas/gt/conn"
-	"github.com/isrc-cas/gt/quic"
+	"github.com/isrc-cas/gt/conn/msquic"
 	"io"
 	"math"
 	"net"
@@ -160,7 +160,8 @@ func (s *Server) quicListen(openBBR bool) (err error) {
 	}
 	if openBBR {
 		//s.quicListener, err = connection.QuicBbrListen(s.config.QuicAddr, tlsConfig)
-		s.quicListener, err = quic.NewListenr(s.config.QuicAddr, 10_000, s.config.KeyFile, s.config.CertFile, "")
+		//s.quicListener, err = quic.NewListenr(s.config.QuicAddr, 10_000, s.config.KeyFile, s.config.CertFile, "")
+		s.quicListener, err = msquic.MsquicListen(s.config.QuicAddr, 10_000, s.config.KeyFile, s.config.CertFile, "")
 	} else {
 		s.quicListener, err = connection.QuicListen(s.config.QuicAddr, tlsConfig)
 	}

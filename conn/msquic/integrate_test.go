@@ -1,17 +1,17 @@
-package quic_test
+package msquic_test
 
 import (
 	"bytes"
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"github.com/isrc-cas/gt/conn/msquic"
 	"io"
 	"net"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/isrc-cas/gt/quic"
 	"github.com/isrc-cas/gt/util"
 )
 
@@ -38,7 +38,7 @@ func TestQUIC(t *testing.T) {
 	}()
 
 	// 启动服务端、客户端
-	listener, err := quic.NewListenr("127.0.0.1:0", 10_000, keyFile, certFile, "")
+	listener, err := msquic.NewListenr("127.0.0.1:0", 10_000, keyFile, certFile, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func TestQUIC(t *testing.T) {
 	<-done
 }
 
-func quicServerStart(listener *quic.Listener) {
+func quicServerStart(listener *msquic.Listener) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -65,7 +65,7 @@ func quicServerStart(listener *quic.Listener) {
 		}
 
 		go func() {
-			conn := conn.(*quic.Connection)
+			conn := conn.(*msquic.Connection)
 			fmt.Printf(
 				"new conn localAddr: %s, remoteAddr: %s\n",
 				conn.LocalAddr().String(),
@@ -113,7 +113,7 @@ func quicClientStart(listenerAddr string, done chan struct{}) {
 	if err != nil {
 		panic(err)
 	}
-	conn, err := quic.NewConnection("localhost:"+port, 10_000, certFile, true)
+	conn, err := msquic.NewConnection("localhost:"+port, 10_000, certFile, true)
 	if err != nil {
 		panic(err)
 	}

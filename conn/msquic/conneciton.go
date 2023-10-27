@@ -1,4 +1,4 @@
-package quic
+package msquic
 
 /*
 #include <stdlib.h>
