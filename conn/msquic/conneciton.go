@@ -1,4 +1,4 @@
-package quic
+package msquic
 
 /*
 #include <stdlib.h>
@@ -19,7 +19,6 @@ import (
 	"github.com/mattn/go-pointer"
 )
 
-// Connection 直接读写是 UDP。OpenStream 才是 TCP。
 type Connection struct {
 	cppConn             unsafe.Pointer
 	pointerID           unsafe.Pointer
@@ -72,6 +71,7 @@ func NewConnection(
 	}
 }
 
+// TODO Connection层面的Read和Write对应的是DATAGRAM扩展，有待实现
 func (c *Connection) Read(b []byte) (n int, err error) {
 	panic("not implemented")
 }
@@ -130,8 +130,8 @@ func (c *Connection) Close() error {
 	return nil
 }
 
-func (c *Connection) OpenStream() (conn net.Conn, err error) {
-	s := &stream{
+func (c *Connection) OpenStream() (conn *Stream, err error) {
+	s := &Stream{
 		onStarted: make(chan struct{}, 1),
 		onSend:    make(chan struct{}, 1),
 		onClose:   make(chan struct{}),
@@ -189,7 +189,7 @@ func OnPeerStreamStarted(cppConn, cppStream, context unsafe.Pointer) {
 	if !ok || conn == nil {
 		return
 	}
-	s := &stream{
+	s := &Stream{
 		cppStream: cppStream,
 		onStarted: make(chan struct{}, 1),
 		onSend:    make(chan struct{}, 1),

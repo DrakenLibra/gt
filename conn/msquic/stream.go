@@ -1,4 +1,4 @@
-package quic
+package msquic
 
 /*
 #include <stdlib.h>
@@ -18,7 +18,7 @@ import (
 	"github.com/mattn/go-pointer"
 )
 
-type stream struct {
+type Stream struct {
 	conn       *Connection
 	cppStream  unsafe.Pointer
 	pointerID  unsafe.Pointer
@@ -30,7 +30,7 @@ type stream struct {
 	receiveBuf []byte
 }
 
-func (s *stream) Close() error {
+func (s *Stream) Close() error {
 	s.closeOnce.Do(func() {
 		close(s.onClose)
 	})
@@ -39,7 +39,7 @@ func (s *stream) Close() error {
 	return nil
 }
 
-func (s *stream) Read(b []byte) (n int, err error) {
+func (s *Stream) Read(b []byte) (n int, err error) {
 	if len(s.receiveBuf) != 0 {
 		n = copy(b, s.receiveBuf)
 		s.receiveBuf = s.receiveBuf[n:]
@@ -60,7 +60,7 @@ handleMsquic:
 	return
 }
 
-func (s *stream) Write(b []byte) (n int, err error) {
+func (s *Stream) Write(b []byte) (n int, err error) {
 	cBuf := C.CBytes(b)
 	C.StreamSend(s.cppStream, cBuf, C.size_t(len(b)))
 	select {
@@ -71,32 +71,32 @@ func (s *stream) Write(b []byte) (n int, err error) {
 	}
 }
 
-func (s *stream) LocalAddr() net.Addr {
+func (s *Stream) LocalAddr() net.Addr {
 	return s.conn.LocalAddr()
 }
 
-func (s *stream) RemoteAddr() net.Addr {
+func (s *Stream) RemoteAddr() net.Addr {
 	return s.conn.RemoteAddr()
 }
 
-func (s *stream) SetDeadline(t time.Time) error {
+func (s *Stream) SetDeadline(t time.Time) error {
 	// stream 无法单独设置超时，只能设置 connection
 	return s.conn.SetDeadline(t)
 }
 
-func (s *stream) SetReadDeadline(t time.Time) error {
+func (s *Stream) SetReadDeadline(t time.Time) error {
 	// stream 无法单独设置超时，只能设置 connection
 	return s.conn.SetReadDeadline(t)
 }
 
-func (s *stream) SetWriteDeadline(t time.Time) error {
+func (s *Stream) SetWriteDeadline(t time.Time) error {
 	// stream 无法单独设置超时，只能设置 connection
 	return s.conn.SetWriteDeadline(t)
 }
 
 //export OnStreamShutdownComplete
 func OnStreamShutdownComplete(cppConn, context unsafe.Pointer) {
-	stream, ok := pointer.Restore(context).(*stream)
+	stream, ok := pointer.Restore(context).(*Stream)
 	if !ok || stream == nil {
 		return
 	}
@@ -107,7 +107,7 @@ func OnStreamShutdownComplete(cppConn, context unsafe.Pointer) {
 
 //export OnStreamStartComplete
 func OnStreamStartComplete(cppStream, context unsafe.Pointer) {
-	stream, ok := pointer.Restore(context).(*stream)
+	stream, ok := pointer.Restore(context).(*Stream)
 	if !ok || stream == nil {
 		return
 	}
@@ -119,7 +119,7 @@ func OnStreamStartComplete(cppStream, context unsafe.Pointer) {
 
 //export OnStreamReceive
 func OnStreamReceive(cppStream, context, data unsafe.Pointer, length C.size_t) {
-	stream, ok := pointer.Restore(context).(*stream)
+	stream, ok := pointer.Restore(context).(*Stream)
 	if !ok || stream == nil {
 		return
 	}
@@ -133,7 +133,7 @@ func OnStreamReceive(cppStream, context, data unsafe.Pointer, length C.size_t) {
 
 //export OnStreamSendComplete
 func OnStreamSendComplete(cppStream, context unsafe.Pointer) {
-	stream, ok := pointer.Restore(context).(*stream)
+	stream, ok := pointer.Restore(context).(*Stream)
 	if !ok || stream == nil {
 		return
 	}

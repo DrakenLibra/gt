@@ -1,7 +1,6 @@
 #include "listener.h"
 #include "connection.hpp"
 #include "quic.hpp"
-#include <iostream>
 
 class Listener {
   public:
@@ -30,22 +29,18 @@ class Listener {
         QUIC_STATUS status = MsQuic->ConfigurationOpen(Registration, &ALPN, 1, &settings,
                                                        sizeof(settings), NULL, &configuration);
         if (QUIC_FAILED(status)) {
-            std::cout << "fail in MsQuic->ConfigurationOpen" << std::endl;
             return false;
         }
 
         QUIC_CREDENTIAL_CONFIG CredConfig = {};
         CredConfig.Flags = QUIC_CREDENTIAL_FLAG_NONE;
         if (strlen(password) == 0) {
-            std::cout << "No password" << std::endl;
             CredConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE;
             QUIC_CERTIFICATE_FILE CertificateFile = {};
             CertificateFile.PrivateKeyFile = keyFile;
             CertificateFile.CertificateFile = certFile;
             CredConfig.CertificateFile = &CertificateFile;
-            std::cout << "key and cert" << keyFile << "|" << keyFile << std::endl;
         } else {
-            std::cout << "Has password" << std::endl;
             CredConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE_PROTECTED;
             QUIC_CERTIFICATE_FILE_PROTECTED certFileProtected = {};
             certFileProtected.PrivateKeyFile = keyFile;
@@ -55,7 +50,6 @@ class Listener {
         }
         status = MsQuic->ConfigurationLoadCredential(configuration, &CredConfig);
         if (QUIC_FAILED(status)) {
-            std::cout << "fail in MsQuic->ConfigurationLoadCredential" << std::endl;
             return false;
         }
 
@@ -64,19 +58,16 @@ class Listener {
         };
         status = MsQuic->ListenerOpen(Registration, cb, this, &listener);
         if (QUIC_FAILED(status)) {
-            std::cout << "fail in MsQuic->ListenerOpen" << std::endl;
             return false;
         }
 
         QUIC_ADDR quicAddr;
         auto ok = QuicAddrFromString(addr, 0, &quicAddr);
         if (!ok) {
-            std::cout << "fail in QuicAddrFromString" << std::endl;
             return false;
         }
         status = MsQuic->ListenerStart(listener, &ALPN, 1, &quicAddr);
         if (QUIC_FAILED(status)) {
-            std::cout << "fail in ListenerStart" << std::endl;
             return false;
         }
 
@@ -132,14 +123,10 @@ class Listener {
 void *NewListener(char *addr, uint64_t idleTimeoutMs, char *keyFile, char *certFile, char *password,
                   void *context) {
     auto listener = new Listener(context);
-    std::cout << "success new Listener" << std::endl;
     auto ok = listener->Start(addr, idleTimeoutMs, keyFile, certFile, password);
-    std::cout << "key and cert" << keyFile << "|" << certFile << std::endl;
-    std::cout << "key and cert" << &keyFile << "|" << &certFile << std::endl;
     if (!ok) {
         delete listener;
         listener = nullptr;
-        std::cout << "fail to start new Listener" << std::endl;
     }
     return listener;
 }

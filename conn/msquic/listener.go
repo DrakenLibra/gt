@@ -1,4 +1,4 @@
-package quic
+package msquic
 
 /*
 #include <stdlib.h>
@@ -62,24 +62,14 @@ func NewListenr(
 	return
 }
 
-// Accept 返回值 net.Conn 是一个 *quic.Connection 类型
+// Accept 返回值 net.Conn 是一个 *msquic.Connection 类型
 func (l *Listener) Accept() (conn net.Conn, err error) {
 	select {
-	//case conn = <-l.onNewConnection:
 	case quicConn := <-l.onNewConnection:
 		newQuicConn, ok := quicConn.(*Connection)
 		if !ok {
-			fmt.Println("my error")
+			return nil, errors.New("listener not get msquic connection")
 		}
-		//s := &stream{
-		//	onStarted: make(chan struct{}, 1),
-		//	onSend:    make(chan struct{}, 1),
-		//	onClose:   make(chan struct{}),
-		//	onReceive: make(chan []byte, 1),
-		//	conn:      newQuicConn,
-		//}
-		//s.pointerID = pointer.Save(s)
-		//s.cppStream = C.AcceptStream(newQuicConn.cppConn, s.pointerID)
 		streamConn, err := newQuicConn.PeerStreamStarted()
 		if streamConn == nil {
 			return nil, errors.New("msquic AcceptStream failed")
