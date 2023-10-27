@@ -20,8 +20,9 @@ func (q *QuicIscasConn) Close() (err error) {
 	return err2
 }
 
-func QuicBbrDial(addr string, config *tls.Config) (conn net.Conn, err error) {
-	parent, err := quic.NewConnection(addr, 10_000, "", true)
+func MsquicDial(addr string, config *tls.Config) (conn net.Conn, err error) {
+	unsecure := config.InsecureSkipVerify
+	parent, err := quic.NewConnection(addr, 10_000, "", unsecure)
 	if err != nil {
 		return
 	}

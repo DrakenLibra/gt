@@ -253,8 +253,10 @@ func (d *dialer) init(c *Client, remote string, stun string) (err error) {
 		}
 		d.host = u.Host
 		d.tlsConfig = tlsConfig
+		//quic-go只有Cubic一种拥塞控制算法
+		//msquic默认使用bbr作为拥塞控制算法
 		if c.Config().OpenBBR {
-			d.dialFn = d.quicBbrDial
+			d.dialFn = d.msquicDial
 		} else {
 			d.dialFn = d.quicDial
 		}
@@ -319,8 +321,8 @@ func (d *dialer) quicDial() (conn net.Conn, err error) {
 	return connection.QuicDial(d.host, d.tlsConfig)
 }
 
-func (d *dialer) quicBbrDial() (conn net.Conn, err error) {
-	return msquic.QuicBbrDial(d.host, d.tlsConfig)
+func (d *dialer) msquicDial() (conn net.Conn, err error) {
+	return msquic.MsquicDial(d.host, d.tlsConfig)
 }
 
 // Start runs the client agent.
