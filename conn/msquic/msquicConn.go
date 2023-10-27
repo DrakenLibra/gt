@@ -2,11 +2,10 @@ package msquic
 
 import (
 	"crypto/tls"
-	"math"
 	"net"
 )
 
-const msquicIdleTimeOutMs uint64 = math.MaxUint64
+const msquicIdleTimeOutMs uint64 = 100_000
 
 type MsquicConn struct {
 	net.Conn // *quic.stream
