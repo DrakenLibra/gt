@@ -41,7 +41,7 @@ class Listener {
             CertificateFile.PrivateKeyFile = keyFile;
             CertificateFile.CertificateFile = certFile;
             CredConfig.CertificateFile = &CertificateFile;
-            std::cout << "key and cert" << keyFile << "|" << keyFile << std::endl;
+            std::cout << "key and cert" << keyFile << " | " << certFile << std::endl;
         } else {
             CredConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE_PROTECTED;
             QUIC_CERTIFICATE_FILE_PROTECTED certFileProtected = {};
