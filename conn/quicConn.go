@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+const probePacketLostTimeOutMs = 5
+
 type QuicConnection struct {
 	quic.Connection
 	quic.Stream
@@ -127,7 +129,7 @@ func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err err
 	}
 
 	for {
-		timer := time.AfterFunc(3*time.Second, func() {
+		timer := time.AfterFunc(probePacketLostTimeOutMs*time.Second, func() {
 			err = conn.(*QuicConnection).CloseWithError(0x42, "close QUIC probe connection")
 			if err != nil {
 				return
