@@ -71,6 +71,17 @@ Stream *Connection::OpenStream(void *context) {
     return stream;
 }
 
+Stream *Connection::AcceptStream(void *context) {
+    auto stream = new Stream(context);
+    // TODO implement stream accept
+    auto ok = stream->Start(connection);
+    if (!ok) {
+        delete stream;
+        stream = nullptr;
+    }
+    return stream;
+}
+
 char *Connection::GetAddr(bool local) {
     QUIC_ADDR addr;
     uint32_t addrLen = sizeof(addr);
@@ -139,6 +150,8 @@ void *NewConnection(void *context, char *serverName, uint16_t serverPort, uint64
 void DeleteConnection(void *conn) { delete (Connection *)conn; }
 
 void *OpenStream(void *conn, void *context) { return ((Connection *)conn)->OpenStream(context); }
+
+void *AcceptStream(void *conn, void *context) { return ((Connection *)conn)->AcceptStream(context); }
 
 char *GetConnectionAddr(void *conn, bool local) { return ((Connection *)conn)->GetAddr(local); }
 

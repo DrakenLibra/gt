@@ -13,6 +13,7 @@ class Connection {
     bool Start(char *serverName, uint16_t serverPort, uint64_t IdleTimeoutMs, char *certFile,
                bool unsecure);
     Stream *OpenStream(void *context);
+    Stream *AcceptStream(void *context);
     char *GetAddr(bool local);
     void SetContext(void *context);
     void SetIdleTimeout(uint64_t idleTimeoutMs);

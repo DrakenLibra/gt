@@ -13,6 +13,7 @@ void *NewConnection(void *context, char *serverName, uint16_t serverPort, uint64
                     char *certFile, bool unsecure);
 void DeleteConnection(void *conn);
 void *OpenStream(void *conn, void *context);
+void *AcceptStream(void *conn, void *context);
 char *GetConnectionAddr(void *conn, bool local);
 void SetConnectionContext(void *conn, void *context);
 void SetConnectionIdleTimeout(void *conn, uint64_t idleTimeoutMs);

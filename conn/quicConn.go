@@ -151,33 +151,6 @@ func GenerateTLSConfig() *tls.Config {
 	}
 }
 
-func GenerateKeyPair() *tls.Config {
-	ecdsaKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil {
-		panic(err)
-	}
-	template := x509.Certificate{SerialNumber: big.NewInt(1)}
-	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &ecdsaKey.PublicKey, ecdsaKey)
-	if err != nil {
-		panic(err)
-	}
-	keyBytes, err := x509.MarshalECPrivateKey(ecdsaKey)
-	if err != nil {
-		panic(err)
-	}
-	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "ECDSA PRIVATE KEY", Bytes: keyBytes})
-	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
-
-	tlsCert, err := tls.X509KeyPair(certPEM, keyPEM)
-	if err != nil {
-		panic(err)
-	}
-	return &tls.Config{
-		Certificates: []tls.Certificate{tlsCert},
-		NextProtos:   []string{"gt-quic"},
-	}
-}
-
 func GetQuicProbesResults(addr string) (avgRtt float64, pktLoss float64, err error) {
 	totalNum := 100
 	var totalSuccessNum int64 = 0
