@@ -74,7 +74,7 @@ gofumpt:
 
 test: compile_webrtc
 	$(eval CGO_CXXFLAGS+=-O0 -g -ggdb)
-	set CGO_ENABLED=1 && go test -race -cover -count 1 ./...
+	go test -race -cover -count 1 ./...
 
 golangci-lint:
 	golangci-lint --version || go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
