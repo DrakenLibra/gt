@@ -73,7 +73,7 @@ gofumpt:
 	gofumpt -l -w $(shell find . -name '*.go' | grep -Ev '^\./bufio|^\./client/std|^\./logger/file-rotatelogs|^\./dep')
 
 test: compile_webrtc compile_msquic
-	$(eval CGO_CXXFLAGS+=-O3)
+	$(eval CGO_CXXFLAGS+=-O0 -g -ggdb)
 	go test -race -cover -count 1 ./...
 
 golangci-lint:
