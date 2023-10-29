@@ -75,7 +75,7 @@ gofumpt:
 test: compile_webrtc compile_msquic
 	$(eval CGO_CXXFLAGS+=-O0 -g -ggdb)
 	#go test -race -cover -count 1 ./bufio ./client ./config ./server ./test ./util
-	go test -race -cover -count 1 ./test/quic_test.go
+	go test -race -cover -count 1 ./test/integrate_test.go ./test/quic_test.go
 
 golangci-lint:
 	golangci-lint --version || go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
