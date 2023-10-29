@@ -64,6 +64,7 @@ func TestQuic(t *testing.T) {
 		"-local", "http://" + l.Addr().String(),
 		"-remote", fmt.Sprintf("quic://%v", s.GetQuicListenerAddrPort()),
 		"-remoteTimeout", "5s",
+		"-remoteCertInsecure",
 	}, nil)
 	if err != nil {
 		t.Fatal(err)
