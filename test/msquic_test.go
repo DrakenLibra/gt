@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func TestQuic(t *testing.T) {
+func TestQuicBbr(t *testing.T) {
 	t.Parallel()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/test", func(writer http.ResponseWriter, request *http.Request) {
@@ -52,6 +52,7 @@ func TestQuic(t *testing.T) {
 		"-id", "05797ac9-86ae-40b0-b767-7a41e03a5486",
 		"-secret", "eec1eabf-2c59-4e19-bf10-34707c17ed89",
 		"-timeout", "10s",
+		"-bbr",
 	}, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -64,6 +65,7 @@ func TestQuic(t *testing.T) {
 		"-local", "http://" + l.Addr().String(),
 		"-remote", fmt.Sprintf("quic://%v", s.GetQuicListenerAddrPort()),
 		"-remoteTimeout", "5s",
+		"-bbr",
 	}, nil)
 	if err != nil {
 		t.Fatal(err)
