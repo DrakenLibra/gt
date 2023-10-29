@@ -2,7 +2,6 @@ package test
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -61,8 +60,8 @@ func TestQuic(t *testing.T) {
 		"client",
 		"-id", "05797ac9-86ae-40b0-b767-7a41e03a5486",
 		"-secret", "eec1eabf-2c59-4e19-bf10-34707c17ed89",
-		"-local", "http://" + l.Addr().String(),
-		"-remote", fmt.Sprintf("quic://%v", s.GetQuicListenerAddrPort()),
+		"-local", "127.0.0.1:12080",
+		"-remote", "127.0.0.1:10080",
 		"-remoteTimeout", "5s",
 		"-remoteCertInsecure",
 	}, nil)
@@ -74,7 +73,7 @@ func TestQuic(t *testing.T) {
 		panic("tunnel should not be closed")
 	})
 
-	conn, err := net.Dial("tcp", s.GetListenerAddrPort().String())
+	conn, err := net.Dial("tcp", "127.0.0.1:8080")
 	if err != nil {
 		t.Fatal(err)
 	}
