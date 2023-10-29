@@ -97,7 +97,7 @@ func TestQuic(t *testing.T) {
 		"-id", "05797ac9-86ae-40b0-b767-7a41e03a5486",
 		"-secret", "eec1eabf-2c59-4e19-bf10-34707c17ed89",
 		"-local", "http://127.0.0.1:8080",
-		"-remote", "quic://05797ac9-86ae-40b0-b767-7a41e03a5486.example.com:12880", // 这里不能使用 127.0.0.1
+		"-remote", "quic://127.0.0.1:12880", // 这里不能使用 127.0.0.1
 		"-remoteTimeout", "5s",
 		"-remoteCertInsecure",
 	}, nil)
