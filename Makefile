@@ -74,7 +74,7 @@ gofumpt:
 
 test: compile_webrtc compile_msquic
 	$(eval CGO_CXXFLAGS+=-O0 -g -ggdb)
-	go test -race -cover -count 1 $(go list ~/gt/... | grep -v 'gt/dep/')
+	go test -race -cover -count 1 $(find ~/gt -type d -not -path ~/gt/dep)
 
 golangci-lint:
 	golangci-lint --version || go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
