@@ -1,0 +1,16 @@
+
+users:
+  id1:
+    secret: secret1
+  id2:
+    secret: secret2
+  id3:
+    secret: secret3
+    host:
+      regex:
+        - ^[a-z]+$
+  id4:
+    secret: secret4
+    host:
+      regex:
+        - ^[a-z]+$

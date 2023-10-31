@@ -1,0 +1,22 @@
+
+users:
+ id1:
+   secret: secret1
+ id2:
+   secret: secret2
+ id3:
+   secret: secret3
+ id4:
+   secret: secret4
+   tcp:
+     - range: 41000-42000
+     - range: 42001-43000
+ id5:
+   secret: secret5
+   tcp:
+     - range: 51001-51999
+ id6:
+   secret: secret6
+   tcp:
+     - range: 50000-51000
+     - range: 52000-60000
