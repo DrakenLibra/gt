@@ -150,19 +150,19 @@ docker_release_linux_arm64_server: docker_create_image
 
 build: build_server build_client
 release: release_server release_client
-build_client: $(SOURCES) Makefile compile_msquic compile_webrtc build_web_client
+build_client: $(SOURCES) Makefile compile_webrtc build_web_client
 	$(eval CGO_CXXFLAGS+=-O0 -g -ggdb)
 	$(eval NAME=$(GOOS)-$(GOARCH)-client)
 	go build $(DEBUG_OPTIONS) -o build/$(NAME)$(EXE) ./cmd/client
-release_client: $(SOURCES) Makefile compile_msquic compile_webrtc release_web_client
+release_client: $(SOURCES) Makefile compile_webrtc release_web_client
 	$(eval CGO_CXXFLAGS+=-O3)
 	$(eval NAME=$(GOOS)-$(GOARCH)-client)
 	go build $(RELEASE_OPTIONS) -o release/$(NAME)$(EXE) ./cmd/client
-build_server: $(SOURCES) Makefile compile_msquic compile_webrtc build_web_server
+build_server: $(SOURCES) Makefile compile_webrtc build_web_server
 	$(eval CGO_CXXFLAGS+=-O0 -g -ggdb)
 	$(eval NAME=$(GOOS)-$(GOARCH)-server)
 	go build $(DEBUG_OPTIONS) -o build/$(NAME)$(EXE) ./cmd/server
-release_server: $(SOURCES) Makefile compile_msquic compile_webrtc release_web_server
+release_server: $(SOURCES) Makefile compile_webrtc release_web_server
 	$(eval CGO_CXXFLAGS+=-O3)
 	$(eval NAME=$(GOOS)-$(GOARCH)-server)
 	go build $(RELEASE_OPTIONS) -o release/$(NAME)$(EXE) ./cmd/server
